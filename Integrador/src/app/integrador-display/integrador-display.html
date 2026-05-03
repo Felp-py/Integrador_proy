@@ -1,0 +1,24 @@
+<div class="header">
+  <h1>PAPA JOHNS CANADA</h1>
+</div>
+
+<div class="grid">
+  <div class="columna" *ngFor="let col of columnas">
+    <div class="pedido" *ngFor="let p of col">
+      <h2>{{ p.numero }}</h2>
+      <p>{{ p.nombre }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>{{ fechaActual }}</p>
+</div>
+<div class="popup" *ngIf="mostrarHistorial">
+  <h2>Historial de pedidos</h2>
+
+  <div *ngFor="let p of historial; let i = index" class="item">
+    <span class="numero">{{ i }}</span>
+    <span>{{ p.nombre }}</span>
+  </div>
+</div>
