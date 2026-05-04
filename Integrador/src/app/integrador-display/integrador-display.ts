@@ -5,21 +5,24 @@ interface Pedido {
   id: number;
   numero: number;
   nombre: string;
+  estado: 'pendiente' | 'preparacion' | 'listo';
 }
 
 @Component({
   selector: 'app-integrador-display',
-  standalone: true, // 👈 FALTABA
-  imports: [CommonModule], // 👈 AQUÍ EL FIX
+  standalone: true,
+  imports: [CommonModule], 
   templateUrl: './integrador-display.html',
-  styleUrls: ['./integrador-display.css'] // 👈 también corregido (plural)
+  styleUrls: ['./integrador-display.css'] 
 })
+
 export class IntegradorDisplay implements OnInit {
 
   pedidos: Pedido[] = [];
+  historial: Pedido[] = [];
+
   contador = 0;
   fechaActual = '';
-  historial: Pedido[] = []; // 👈 pila
   mostrarHistorial = false;
 
   ngOnInit() {
@@ -30,48 +33,67 @@ export class IntegradorDisplay implements OnInit {
   }
 
   constructor() {
-    for (let i = 0; i < 8; i++) {
+    this.Cargar();
+  }
+
+  Cargar() {
+    for (let i = 0; i < 6; i++) {
       this.agregarPedido();
     }
   }
 
   agregarPedido() {
-    console.log('agregando pedido');
+    this.contador++;
 
     this.pedidos.push({
       id: Date.now(),
       numero: this.contador,
-      nombre: 'Pedido ' + this.contador
+      nombre: 'Pedido ' + this.contador,
+      estado: 'pendiente'
     });
-    this.contador++;
-    this.reordenar();
   }
 
-  eliminarPedido(numero: number) {
-  const pedidoEliminado = this.pedidos.find(p => p.numero === numero);
+  cambiarEstado(numero: number) {
+    const pedido = this.pedidos.find(p => p.numero === numero);
 
-  if (pedidoEliminado) {
-    this.historial.unshift(pedidoEliminado); // 👈 pila (último arriba)
+    if(!pedido) return;
 
-    if (this.historial.length > 10) {
-      this.historial.pop(); // máximo 10
+    if(pedido.estado === 'pendiente') {
+      pedido.estado = 'preparacion';
+    }
+    else if(pedido.estado === 'preparacion') {
+      pedido.estado = 'listo';
+    }
+    else {
+      this.eliminarPedido(numero);
     }
   }
 
-  this.pedidos = this.pedidos.filter(p => p.numero !== numero);
-  this.reordenar();
-}
-recuperarPedido(index: number) {
-  if (index >= this.historial.length) return;
+  eliminarPedido(numero: number) {
+    const pedidoEliminado = this.pedidos.findIndex(p => p.numero === numero);
 
-  const pedido = this.historial[index];
+    if (pedidoEliminado !== -1) {
+      const eliminado = this.pedidos[pedidoEliminado];
 
-  if (pedido) {
-    this.pedidos.unshift(pedido); // vuelve al inicio
-    this.historial.splice(index, 1);
-    this.reordenar();
+      this.historial.unshift(eliminado); 
+
+      if (this.historial.length > 10) {
+        this.historial.pop(); 
+      }
+
+      this.pedidos.splice(pedidoEliminado, 1);
+    }
   }
-}
+
+  recuperarPedido(index: number) {
+    const pedido = this.historial[index];
+
+    if (pedido) {
+      this.pedidos.unshift(pedido); 
+      this.historial.splice(index, 1);
+      this.reordenar();
+    }
+  }
 
   reordenar() {
     this.pedidos.forEach((p, index) => {
@@ -79,41 +101,41 @@ recuperarPedido(index: number) {
     });
   }
 
+  get columnas() {
+    const cols: Pedido[][] = [[], [], [], []];
+
+    this.pedidos.forEach((pedido, index) => {
+      cols[index % 4].push(pedido);
+    });
+
+    return cols;
+  }
+
   @HostListener('window:keydown', ['$event'])
-handleKey(event: KeyboardEvent) {
-  console.log('tecla:', event.key);
+  handleKey(event: KeyboardEvent) {
+    console.log('tecla:', event.key);
 
-  // 🔴 Botón rojo (R)
-  if (event.key === 'r' || event.key === 'R') {
-    this.mostrarHistorial = !this.mostrarHistorial;
-    return;
-  }
+    if (event.key === 'r' || event.key === 'R') {
+      this.mostrarHistorial = !this.mostrarHistorial;
+      return;
+    }
 
-  // ➕ Agregar pedido
-  if (event.key === 'a' || event.key === 'A') {
-    this.agregarPedido();
-    return;
-  }
+    if (event.key === 'a' || event.key === 'A') {
+      this.agregarPedido();
+      return;
+    }
 
-  const num = parseInt(event.key);
+    const num = parseInt(event.key);
 
-  if (!isNaN(num)) {
+    if (!isNaN(num)) {
 
-    // 🔵 Si popup abierto → RECUPERAR
-    if (this.mostrarHistorial) {
-      this.recuperarPedido(num);
-    } 
-    // 🟢 Si no → ELIMINAR
-    else {
-      this.eliminarPedido(num);
+      if (this.mostrarHistorial) {
+        this.recuperarPedido(num);
+      } 
+
+      else {
+        this.cambiarEstado(num);
+      }
     }
   }
-}
-get columnas() {
-  const cols = [[], [], [], []] as Pedido[][];
-  this.pedidos.forEach((pedido, i) => {
-    cols[i % 4].push(pedido);
-  });
-  return cols;
-}
 }

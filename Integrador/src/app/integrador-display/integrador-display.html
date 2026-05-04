@@ -1,24 +1,45 @@
 <div class="header">
-  <h1>PAPA JOHNS CANADA</h1>
+  <h1>CAPITÁN BURGER</h1>
+  <p>{{ fechaActual }}</p>
+</div>
+
+<div class="acciones">
+  <button (click)="agregarPedido()">Nuevo Pedido</button>
+  <button (click)="mostrarHistorial = !mostrarHistorial">
+    Historial
+  </button>
 </div>
 
 <div class="grid">
   <div class="columna" *ngFor="let col of columnas">
-    <div class="pedido" *ngFor="let p of col">
-      <h2>{{ p.numero }}</h2>
+
+    <div class="pedido" [ngClass]="p.estado" *ngFor="let p of col">
+      <h2>#{{ p.numero }}</h2>
       <p>{{ p.nombre }}</p>
+
+      <p class="estado">{{ p.estado }}</p>
+
+      <button (click)="cambiarEstado(p.numero)">
+        {{
+          p.estado === 'pendiente' ? 'Iniciar' :
+          p.estado === 'preparacion' ? 'Finalizar' :
+          'Entregar'
+        }}
+      </button>
     </div>
+
   </div>
 </div>
 
-<div class="footer">
-  <p>{{ fechaActual }}</p>
-</div>
 <div class="popup" *ngIf="mostrarHistorial">
-  <h2>Historial de pedidos</h2>
+  <h2>Historial</h2>
 
   <div *ngFor="let p of historial; let i = index" class="item">
-    <span class="numero">{{ i }}</span>
+    <span>#{{ p.numero }}</span>
     <span>{{ p.nombre }}</span>
+
+    <button (click)="recuperarPedido(i)">
+      Recuperar
+    </button>
   </div>
 </div>
