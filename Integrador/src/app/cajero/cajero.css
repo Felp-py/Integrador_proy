@@ -1,0 +1,94 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+}
+
+.header {
+    background: linear-gradient(90deg, #9E3B3B, #FFCDC9);
+    color: white;
+    text-align: center;
+    padding: 15px;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+}
+
+.contenedor {
+    display: flex;
+    height: calc(100vh - 100px);
+    padding: 10px;
+    gap: 10px;
+}
+
+.pedido {
+    width: 30%;
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFDBB6;
+    margin: 8px 0;
+    padding: 8px;
+    border-radius: 10px;
+}
+
+button {
+    padding: 8px 10px;
+    border: none;
+    background: #9E3B3B;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #FFC7A7;
+    color: black;
+}
+
+.total {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.confirmar {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    background: #A8BBA3;
+    color: black;
+    font-weight: bold;
+}
+
+.productos {
+    width: 70%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.productos button {
+    background: #98A1BC;
+    padding: 20px;
+    font-size: 14px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.productos button:hover {
+    background: #FFDBB6;
+}
+
+.nav {
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+}

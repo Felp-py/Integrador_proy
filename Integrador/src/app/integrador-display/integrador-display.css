@@ -91,3 +91,9 @@ button:hover {
   justify-content: space-between;
   margin: 10px 0;
 }
+
+.nav {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+}

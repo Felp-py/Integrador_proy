@@ -1,0 +1,36 @@
+<div class="nav">
+    <button routerLink="/cocina">Ir a Cocina 👨‍🍳</button>
+</div>
+
+<div class="header">
+    <h1>CAPITÁN BURGER - CAJA</h1>
+</div>
+
+<div class="contenedor">
+
+    <div class="pedido">
+        <h2>Pedido Actual</h2>
+
+        <div *ngFor="let item of carrito; let i = index" class="item">
+            <span>{{ item.nombre }}</span>
+            <span>S/ {{ item.precio }}</span>
+            <button (click)="eliminar(i)">X</button>
+        </div>
+
+        <div class="total">
+            <h3>Total: S/ {{ total }}</h3>
+        </div>
+
+        <button class="confirmar" (click)="confirmarPedido()">
+            Confirmar Pedido
+        </button>
+    </div>
+
+    <div class="productos">
+        <button *ngFor="let p of productos" (click)="agregar(p)">
+        <strong>{{ p.nombre }}</strong><br>
+        S/ {{ p.precio }}
+        </button>
+    </div>
+
+</div>

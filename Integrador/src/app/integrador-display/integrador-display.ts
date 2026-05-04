@@ -1,5 +1,6 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 interface Pedido {
   id: number;
@@ -11,11 +12,10 @@ interface Pedido {
 @Component({
   selector: 'app-integrador-display',
   standalone: true,
-  imports: [CommonModule], 
+  imports: [CommonModule, RouterModule],
   templateUrl: './integrador-display.html',
-  styleUrls: ['./integrador-display.css'] 
+  styleUrls: ['./integrador-display.css']
 })
-
 export class IntegradorDisplay implements OnInit {
 
   pedidos: Pedido[] = [];
@@ -27,16 +27,15 @@ export class IntegradorDisplay implements OnInit {
 
   ngOnInit() {
     setInterval(() => {
-      const now = new Date();
-      this.fechaActual = now.toLocaleString();
+      this.fechaActual = new Date().toLocaleString();
     }, 1000);
   }
 
   constructor() {
-    this.Cargar();
+    this.cargarDemo();
   }
 
-  Cargar() {
+  cargarDemo() {
     for (let i = 0; i < 6; i++) {
       this.agregarPedido();
     }
@@ -56,32 +55,30 @@ export class IntegradorDisplay implements OnInit {
   cambiarEstado(numero: number) {
     const pedido = this.pedidos.find(p => p.numero === numero);
 
-    if(!pedido) return;
+    if (!pedido) return;
 
-    if(pedido.estado === 'pendiente') {
+    if (pedido.estado === 'pendiente') {
       pedido.estado = 'preparacion';
-    }
-    else if(pedido.estado === 'preparacion') {
+    } else if (pedido.estado === 'preparacion') {
       pedido.estado = 'listo';
-    }
-    else {
+    } else {
       this.eliminarPedido(numero);
     }
   }
 
   eliminarPedido(numero: number) {
-    const pedidoEliminado = this.pedidos.findIndex(p => p.numero === numero);
+    const index = this.pedidos.findIndex(p => p.numero === numero);
 
-    if (pedidoEliminado !== -1) {
-      const eliminado = this.pedidos[pedidoEliminado];
+    if (index !== -1) {
+      const eliminado = this.pedidos[index];
 
-      this.historial.unshift(eliminado); 
+      this.historial.unshift(eliminado);
 
       if (this.historial.length > 10) {
-        this.historial.pop(); 
+        this.historial.pop();
       }
 
-      this.pedidos.splice(pedidoEliminado, 1);
+      this.pedidos.splice(index, 1);
     }
   }
 
@@ -89,53 +86,18 @@ export class IntegradorDisplay implements OnInit {
     const pedido = this.historial[index];
 
     if (pedido) {
-      this.pedidos.unshift(pedido); 
+      this.pedidos.unshift(pedido);
       this.historial.splice(index, 1);
-      this.reordenar();
     }
-  }
-
-  reordenar() {
-    this.pedidos.forEach((p, index) => {
-      p.numero = index;
-    });
   }
 
   get columnas() {
     const cols: Pedido[][] = [[], [], [], []];
 
-    this.pedidos.forEach((pedido, index) => {
-      cols[index % 4].push(pedido);
+    this.pedidos.forEach((p, i) => {
+      cols[i % 4].push(p);
     });
 
     return cols;
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  handleKey(event: KeyboardEvent) {
-    console.log('tecla:', event.key);
-
-    if (event.key === 'r' || event.key === 'R') {
-      this.mostrarHistorial = !this.mostrarHistorial;
-      return;
-    }
-
-    if (event.key === 'a' || event.key === 'A') {
-      this.agregarPedido();
-      return;
-    }
-
-    const num = parseInt(event.key);
-
-    if (!isNaN(num)) {
-
-      if (this.mostrarHistorial) {
-        this.recuperarPedido(num);
-      } 
-
-      else {
-        this.cambiarEstado(num);
-      }
-    }
   }
 }

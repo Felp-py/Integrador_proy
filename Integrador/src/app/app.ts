@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { IntegradorDisplay } from './integrador-display/integrador-display';
+import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-root', // 👈 SIEMPRE así
+  selector: 'app-root',
   standalone: true,
-  imports: [IntegradorDisplay], // 👈 importas el componente
-  templateUrl: './app.html', // 👈 NO el del integrador
-  styleUrls: ['./app.css']
+  imports: [RouterModule], 
+  templateUrl: './app.html',
+  styleUrl: './app.css'
 })
-export class App {}
+export class App {
+}
