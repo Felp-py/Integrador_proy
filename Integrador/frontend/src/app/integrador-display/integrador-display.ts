@@ -1,14 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core'; // 👈 Added ChangeDetectorRef
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { PedidoService } from '../pedido'; // 👈 IMPORT CORRECTO
-
-interface Pedido {
-  id: number;
-  numero: number;
-  nombre: string;
-  estado: 'pendiente' | 'preparacion' | 'listo';
-}
+import { SocketService } from '../socket';
 
 @Component({
   selector: 'app-integrador-display',
@@ -19,79 +12,71 @@ interface Pedido {
 })
 export class IntegradorDisplay implements OnInit {
 
-  constructor(private pedidoService: PedidoService) {} // 👈 SOLO UN CONSTRUCTOR
+  constructor(
+    private socket: SocketService,
+    private cdr: ChangeDetectorRef // 👈 Inject this
+  ) {}
 
-  pedidos: Pedido[] = [];
-  historial: Pedido[] = [];
-
+  pedidos: any[] = [];
+  columnas: any[][] = [[], [], [], []];
   fechaActual = '';
-  mostrarHistorial = false;
+
+   @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Check if the key pressed is a number between 0 and 9
+    const key = event.key;
+    if (key >= '0' && key <= '9') {
+      const index = parseInt(key, 10);
+      this.cambiarEstado(index);
+    }}
 
   ngOnInit() {
-
-    // 🕒 reloj
+    // 1. Fixed Clock: No need for runOutsideAngular for a basic display
+    this.actualizarReloj();
     setInterval(() => {
-      this.fechaActual = new Date().toLocaleString();
+      this.actualizarReloj();
     }, 1000);
 
-    // 🔥 ESCUCHAR pedidos del cajero
-    this.pedidoService.pedidos$.subscribe(pedidos => {
-      this.pedidos = pedidos;
+    // 2. Fixed Socket: Force Angular to "see" the new data
+    this.socket.escucharPedidos().subscribe((data: any) => {
+      console.log('📡 Pedidos recibidos:', data);
+      this.pedidos = data;
+      this.actualizarColumnas();
+      
+      // 🔥 This tells Angular: "Hey, data changed, redraw the screen NOW"
+      this.cdr.detectChanges(); 
     });
   }
 
-  cambiarEstado(numero: number) {
-    const pedido = this.pedidos.find(p => p.numero === numero);
-    if (!pedido) return;
+  actualizarReloj() {
+    this.fechaActual = new Date().toLocaleString();
+    this.cdr.detectChanges(); // Ensures the clock ticks every second
+  }
+
+  actualizarColumnas() {
+    const cols: any[][] = [[], [], [], []];
+    this.pedidos.forEach((p, i) => {
+      // We store the original index so the buttons still work correctly
+      cols[i % 4].push({ ...p, originalIndex: i });
+    });
+    this.columnas = cols;
+  }
+
+  // Update your HTML button to use p.originalIndex
+ cambiarEstado(index: number) {
+    const pedido = this.pedidos[index];
+    if (!pedido) return; // If I press '5' but there are only 3 orders, do nothing.
 
     if (pedido.estado === 'pendiente') {
       pedido.estado = 'preparacion';
     } else if (pedido.estado === 'preparacion') {
       pedido.estado = 'listo';
     } else {
-      this.eliminarPedido(numero);
-      return;
-    }
-
-    this.pedidoService.actualizarPedidos(this.pedidos); // 👈 sincronizar
-  }
-
-  eliminarPedido(numero: number) {
-    const index = this.pedidos.findIndex(p => p.numero === numero);
-
-    if (index !== -1) {
-      const eliminado = this.pedidos[index];
-
-      this.historial.unshift(eliminado);
-
-      if (this.historial.length > 10) {
-        this.historial.pop();
-      }
-
       this.pedidos.splice(index, 1);
-
-      this.pedidoService.actualizarPedidos(this.pedidos); // 👈 sincronizar
     }
-  }
 
-  recuperarPedido(index: number) {
-    const pedido = this.historial[index];
-
-    if (pedido) {
-      this.pedidos.unshift(pedido);
-      this.historial.splice(index, 1);
-
-      this.pedidoService.actualizarPedidos(this.pedidos); // 👈 sincronizar
-    }
-  }
-
-  get columnas() {
-    const cols: Pedido[][] = [[], [], [], []];
-
-    this.pedidos.forEach((p, i) => {
-      cols[i % 4].push(p);
-    });
-
-    return cols;
+    this.socket.actualizarPedidos(this.pedidos);
+    this.actualizarColumnas();
+    this.cdr.detectChanges();
   }
 }

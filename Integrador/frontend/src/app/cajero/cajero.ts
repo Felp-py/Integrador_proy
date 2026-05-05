@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { PedidoService } from '../pedido'; // 👈 SIN .ts
+import { SocketService } from '../socket'; // 👈 NUEVO
 
 interface Item {
   nombre: string;
@@ -17,7 +17,7 @@ interface Item {
 })
 export class Cajero {
 
-  constructor(private pedidoService: PedidoService) {} // 👈 DENTRO de la clase
+  constructor(private socket: SocketService) {} // 👈 CAMBIO
 
   carrito: Item[] = [];
 
@@ -43,13 +43,20 @@ export class Cajero {
   }
 
   confirmarPedido() {
-    if (this.carrito.length === 0) return;
+  if (this.carrito.length === 0) return;
 
-    const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
+  const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
 
-    this.pedidoService.agregarPedido(nombrePedido);
+  console.log('🔥 CLICK CONFIRMAR'); // 👈 DEBUG 1
 
-    alert('Pedido enviado a cocina 🍔');
-    this.carrito = [];
-  }
+  this.socket.enviarPedido({
+    id: Date.now(),
+    nombre: nombrePedido,
+    estado: 'pendiente'
+  });
+
+  console.log('📡 ENVIADO AL SOCKET'); // 👈 DEBUG 2
+
+  this.carrito = [];
+}
 }

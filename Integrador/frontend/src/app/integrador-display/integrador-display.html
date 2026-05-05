@@ -7,23 +7,32 @@
   <p>{{ fechaActual }}</p>
 </div>
 
+<!-- ... existing header code ... -->
+
 <div class="grid">
   <div class="columna" *ngFor="let col of columnas">
+    <div class="pedido" *ngFor="let p of col" [ngClass]="p.estado">
+      
+      <div class="pedido-header">
+        <!-- Use the saved original index -->
+        <h2>#{{ p.originalIndex }}</h2> 
+      </div>
 
-    <div class="pedido" [ngClass]="p.estado" *ngFor="let p of col">
-      <h2>#{{ p.numero }}</h2>
-      <p>{{ p.nombre }}</p>
+      <div class="pedido-body">
+        <p class="nombre">{{ p.nombre }}</p>
+        <p class="estado">{{ p.estado }}</p>
+      </div>
 
-      <p class="estado">{{ p.estado }}</p>
-
-      <button (click)="cambiarEstado(p.numero)">
-        {{
-          p.estado === 'pendiente' ? 'Iniciar' :
-          p.estado === 'preparacion' ? 'Finalizar' :
-          'Entregar'
-        }}
-      </button>
+      <div class="pedido-footer">
+        <!-- Use p.originalIndex here too -->
+        <button (click)="cambiarEstado(p.originalIndex)">
+          {{
+            p.estado === 'pendiente' ? 'Iniciar' :
+            p.estado === 'preparacion' ? 'Finalizar' :
+            'Entregar'
+          }}
+        </button>
+      </div>
     </div>
-
   </div>
 </div>
