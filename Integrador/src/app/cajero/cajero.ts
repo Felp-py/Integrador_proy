@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { PedidoService } from '../pedido'; // 👈 SIN .ts
 
 interface Item {
   nombre: string;
@@ -15,6 +16,8 @@ interface Item {
   styleUrls: ['./cajero.css']
 })
 export class Cajero {
+
+  constructor(private pedidoService: PedidoService) {} // 👈 DENTRO de la clase
 
   carrito: Item[] = [];
 
@@ -40,6 +43,12 @@ export class Cajero {
   }
 
   confirmarPedido() {
+    if (this.carrito.length === 0) return;
+
+    const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
+
+    this.pedidoService.agregarPedido(nombrePedido);
+
     alert('Pedido enviado a cocina 🍔');
     this.carrito = [];
   }

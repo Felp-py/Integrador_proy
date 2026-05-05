@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { PedidoService } from '../pedido'; // 👈 IMPORT CORRECTO
 
 interface Pedido {
   id: number;
@@ -18,43 +19,29 @@ interface Pedido {
 })
 export class IntegradorDisplay implements OnInit {
 
+  constructor(private pedidoService: PedidoService) {} // 👈 SOLO UN CONSTRUCTOR
+
   pedidos: Pedido[] = [];
   historial: Pedido[] = [];
 
-  contador = 0;
   fechaActual = '';
   mostrarHistorial = false;
 
   ngOnInit() {
+
+    // 🕒 reloj
     setInterval(() => {
       this.fechaActual = new Date().toLocaleString();
     }, 1000);
-  }
 
-  constructor() {
-    this.cargarDemo();
-  }
-
-  cargarDemo() {
-    for (let i = 0; i < 6; i++) {
-      this.agregarPedido();
-    }
-  }
-
-  agregarPedido() {
-    this.contador++;
-
-    this.pedidos.push({
-      id: Date.now(),
-      numero: this.contador,
-      nombre: 'Pedido ' + this.contador,
-      estado: 'pendiente'
+    // 🔥 ESCUCHAR pedidos del cajero
+    this.pedidoService.pedidos$.subscribe(pedidos => {
+      this.pedidos = pedidos;
     });
   }
 
   cambiarEstado(numero: number) {
     const pedido = this.pedidos.find(p => p.numero === numero);
-
     if (!pedido) return;
 
     if (pedido.estado === 'pendiente') {
@@ -63,7 +50,10 @@ export class IntegradorDisplay implements OnInit {
       pedido.estado = 'listo';
     } else {
       this.eliminarPedido(numero);
+      return;
     }
+
+    this.pedidoService.actualizarPedidos(this.pedidos); // 👈 sincronizar
   }
 
   eliminarPedido(numero: number) {
@@ -79,6 +69,8 @@ export class IntegradorDisplay implements OnInit {
       }
 
       this.pedidos.splice(index, 1);
+
+      this.pedidoService.actualizarPedidos(this.pedidos); // 👈 sincronizar
     }
   }
 
@@ -88,6 +80,8 @@ export class IntegradorDisplay implements OnInit {
     if (pedido) {
       this.pedidos.unshift(pedido);
       this.historial.splice(index, 1);
+
+      this.pedidoService.actualizarPedidos(this.pedidos); // 👈 sincronizar
     }
   }
 
