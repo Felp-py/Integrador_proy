@@ -97,3 +97,25 @@ button:hover {
   justify-content: center;
   margin: 10px;
 }
+
+.pedido {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+/* estados */
+.pendiente {
+  background-color: #e74c3c; /* rojo */
+}
+
+.preparacion {
+  background-color: #f1c40f; /* amarillo */
+  color: black;
+}
+
+.listo {
+  background-color: #2ecc71; /* verde */
+}

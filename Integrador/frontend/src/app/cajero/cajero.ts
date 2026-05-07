@@ -255,8 +255,24 @@ export class Cajero {
   }
 
   get total() {
-    return this.carrito.reduce(
-      (sum, i) => sum + i.precio, 0
-    );
+    return this.carrito.reduce((sum, i) => sum + i.precio, 0);
   }
+
+  confirmarPedido() {
+  if (this.carrito.length === 0) return;
+
+  const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
+
+  console.log('🔥 CLICK CONFIRMAR'); // 👈 DEBUG 1
+
+  this.socket.enviarPedido({
+    id: Date.now(),
+    nombre: nombrePedido,
+    estado: 'pendiente'
+  });
+
+  console.log('📡 ENVIADO AL SOCKET'); // 👈 DEBUG 2
+
+  this.carrito = [];
+}
 }
