@@ -43,20 +43,18 @@ export class Cajero {
   }
 
   confirmarPedido() {
-  if (this.carrito.length === 0) return;
+    if (this.carrito.length === 0) return;
 
-  const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
+    const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
 
-  console.log('🔥 CLICK CONFIRMAR'); // 👈 DEBUG 1
+    // 🔥 ENVÍO REAL AL SERVIDOR
+    this.socket.enviarPedido({
+      id: Date.now(),
+      nombre: nombrePedido,
+      estado: 'pendiente'
+    });
 
-  this.socket.enviarPedido({
-    id: Date.now(),
-    nombre: nombrePedido,
-    estado: 'pendiente'
-  });
-
-  console.log('📡 ENVIADO AL SOCKET'); // 👈 DEBUG 2
-
-  this.carrito = [];
-}
+    alert('Pedido enviado a cocina 🍔');
+    this.carrito = [];
+  }
 }
