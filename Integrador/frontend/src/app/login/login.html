@@ -1,0 +1,22 @@
+<div class="login-contenedor">
+  <div class="login-card">
+    <h1>CAPITÁN BURGER 🍔</h1>
+    <h2>Control de Personal</h2>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="campo">
+        <label>Usuario:</label>
+        <input type="text" [(ngModel)]="usuario" name="usuario" placeholder="Ej: caja1" required>
+      </div>
+
+      <div class="campo">
+        <label>Contraseña:</label>
+        <input type="password" [(ngModel)]="clave" name="clave" placeholder="••••••••" required>
+      </div>
+
+      <p class="error" *ngIf="errorMensaje">{{ errorMensaje }}</p>
+
+      <button type="submit" class="btn-ingresar">Ingresar al Sistema</button>
+    </form>
+  </div>
+</div>
