@@ -1,36 +1,93 @@
-<div class="nav">
-    <button routerLink="/cocina">Ir a Cocina 👨‍🍳</button>
-</div>
-
-<div class="header">
-    <h1>CAPITÁN BURGER - CAJA</h1>
-</div>
-
 <div class="contenedor">
-
+    <!-- PANEL IZQUIERDO -->
     <div class="pedido">
-        <h2>Pedido Actual</h2>
-
-        <div *ngFor="let item of carrito; let i = index" class="item">
-            <span>{{ item.nombre }}</span>
-            <span>S/ {{ item.precio }}</span>
-            <button (click)="eliminar(i)">X</button>
+        <h1>CAPITÁN BURGER</h1>
+        <div class="lista-pedido">
+            <div
+                *ngFor="let item of carrito; let i = index"
+                class="item">
+                <div>
+                    <strong>{{ item.nombre }}</strong>
+                    <p>{{ item.tamanio }}</p>
+                    <small *ngIf="item.extras.length">
+                        Extras:
+                        {{ item.extras.join(', ') }}
+                    </small>
+                    <br>
+                    <small *ngIf="item.observacion">
+                        Obs:
+                        {{ item.observacion }}
+                    </small>
+                </div>
+                <div class="derecha-item">
+                    <p>S/ {{ item.precio }}</p>
+                    <button
+                        class="eliminar"
+                        (click)="eliminar(i)">
+                        ✕
+                    </button>
+                </div>
+            </div>
         </div>
-
-        <div class="total">
-            <h3>Total: S/ {{ total }}</h3>
+        <div class="footer">
+            <h2>Total: S/ {{ total }}</h2>
+            <button class="confirmar">
+                Confirmar Pedido
+            </button>
         </div>
-
-        <button class="confirmar" (click)="confirmarPedido()">
-            Confirmar Pedido
-        </button>
     </div>
-
-    <div class="productos">
-        <button *ngFor="let p of productos" (click)="agregar(p)">
-        <strong>{{ p.nombre }}</strong><br>
-        S/ {{ p.precio }}
-        </button>
+    <!-- PANEL DERECHO -->
+    <div class="panel">
+        <!-- CATEGORÍAS -->
+        <div class="categorias">
+            <button
+                *ngFor="let c of categorias"
+                [style.background]="c.color"
+                (click)="categoriaSeleccionada = c.nombre">
+                {{ c.nombre }}
+            </button>
+        </div>
+        <!-- PRODUCTOS -->
+        <div class="productos">
+            <button
+                *ngFor="let p of productosFiltrados"
+                [style.border-color]="p.color"
+                (click)="agregar(p)">
+                <h3>{{ p.nombre }}</h3>
+                <span>S/ {{ p.precio }}</span>
+            </button>
+        </div>
+        <!-- TAMAÑOS -->
+        <div class="extras-box">
+            <h3>Tamaño</h3>
+            <div class="extras">
+                <button
+                    *ngFor="let t of tamanos"
+                    [class.activo]="tamanoSeleccionado === t"
+                    (click)="tamanoSeleccionado = t">
+                    {{ t }}
+                </button>
+            </div>
+        </div>
+        <!-- INGREDIENTES -->
+        <div class="extras-box">
+            <h3>Ingredientes Extra</h3>
+            <div class="extras">
+                <button
+                    *ngFor="let extra of ingredientesExtra"
+                    (click)="toggleExtra(extra)"
+                    [class.activo]="extrasSeleccionados.includes(extra)">
+                    {{ extra }}
+                </button>
+            </div>
+        </div>
+        <!-- OBSERVACIONES -->
+        <div class="extras-box">
+            <h3>Observaciones</h3>
+            <textarea
+                [(ngModel)]="observacion"
+                placeholder="Ej: sin cebolla, extra salsa...">
+            </textarea>
+        </div>
     </div>
-
 </div>
