@@ -3,36 +3,49 @@
 </div>
 
 <div class="header">
-  <h1>CAPITÁN BURGER</h1>
+  <h1>CAPITÁN BURGER - COCINA 👨‍🍳</h1>
   <p>{{ fechaActual }}</p>
 </div>
 
-<!-- ... existing header code ... -->
-
 <div class="grid">
   <div class="columna" *ngFor="let col of columnas">
+
     <div class="pedido" *ngFor="let p of col" [ngClass]="p.estado">
       
       <div class="pedido-header">
-        <!-- Use the saved original index -->
-        <h2>#{{ p.originalIndex }}</h2> 
-      </div>
+        <span class="tecla-shortcut">{{ p.originalIndex }}</span>
+        <h2>Ticket #{{ p.id.toString().slice(-4) }}</h2> </div>
 
       <div class="pedido-body">
-        <p class="nombre">{{ p.nombre }}</p>
-        <p class="estado">{{ p.estado }}</p>
+        <div *ngFor="let item of p.items" class="ticket-item">
+          <div class="item-main">
+            <strong>• {{ item.nombre }}</strong>
+            <span class="badge-tamano">{{ item.tamano }}</span>
+          </div>
+          
+          <div *ngIf="item.extras && item.extras.length" class="item-extras">
+            <small>➕ {{ item.extras.join(', ') }}</small>
+          </div>
+          
+          <div *ngIf="item.observacion" class="item-obs">
+            <small>📝 " {{ item.observacion }} "</small>
+          </div>
+        </div>
+        
+        <p class="estado-label">Estado: <span>{{ p.estado | uppercase }}</span></p>
       </div>
 
       <div class="pedido-footer">
-        <!-- Use p.originalIndex here too -->
         <button (click)="cambiarEstado(p.originalIndex)">
           {{
-            p.estado === 'pendiente' ? 'Iniciar' :
-            p.estado === 'preparacion' ? 'Finalizar' :
-            'Entregar'
+            p.estado === 'pendiente' ? 'Iniciar 👨‍🍳' :
+            p.estado === 'preparacion' ? 'Listo 🔔' :
+            'Entregar 📦'
           }}
         </button>
       </div>
+
     </div>
+
   </div>
 </div>

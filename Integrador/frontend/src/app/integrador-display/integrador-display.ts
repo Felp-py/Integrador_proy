@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core'; // 👈 Added ChangeDetectorRef
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SocketService } from '../socket';
@@ -14,65 +14,63 @@ export class IntegradorDisplay implements OnInit {
 
   constructor(
     private socket: SocketService,
-    private cdr: ChangeDetectorRef // 👈 Inject this
+    private cdr: ChangeDetectorRef
   ) {}
 
   pedidos: any[] = [];
   columnas: any[][] = [[], [], [], []];
   fechaActual = '';
 
-   @HostListener('window:keydown', ['$event'])
+  // ⌨️ KEYBOARD SHORTCUTS (Press 0-9 to advance orders instantly)
+  @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    // Check if the key pressed is a number between 0 and 9
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      return; // Ignore shortcut if the user is typing in an input field
+    }
     const key = event.key;
     if (key >= '0' && key <= '9') {
       const index = parseInt(key, 10);
       this.cambiarEstado(index);
-    }}
+    }
+  }
 
   ngOnInit() {
-    // 1. Fixed Clock: No need for runOutsideAngular for a basic display
     this.actualizarReloj();
-    setInterval(() => {
-      this.actualizarReloj();
-    }, 1000);
+    setInterval(() => this.actualizarReloj(), 1000);
 
-    // 2. Fixed Socket: Force Angular to "see" the new data
+    // 📡 Socket listener receiving the new structured orders array
     this.socket.escucharPedidos().subscribe((data: any) => {
-      console.log('📡 Pedidos recibidos:', data);
+      console.log('📡 Pedidos actualizados en cocina:', data);
       this.pedidos = data;
       this.actualizarColumnas();
-      
-      // 🔥 This tells Angular: "Hey, data changed, redraw the screen NOW"
-      this.cdr.detectChanges(); 
+      this.cdr.detectChanges();
     });
   }
 
   actualizarReloj() {
     this.fechaActual = new Date().toLocaleString();
-    this.cdr.detectChanges(); // Ensures the clock ticks every second
+    this.cdr.detectChanges();
   }
 
   actualizarColumnas() {
     const cols: any[][] = [[], [], [], []];
-    this.pedidos.forEach((p, i) => {
-      // We store the original index so the buttons still work correctly
-      cols[i % 4].push({ ...p, originalIndex: i });
+    this.pedidos.forEach((pedido, index) => {
+      // Retain reference to original index for trackable button/keyboard interactions
+      cols[index % 4].push({ ...pedido, originalIndex: index });
     });
     this.columnas = cols;
   }
 
-  // Update your HTML button to use p.originalIndex
- cambiarEstado(index: number) {
+  cambiarEstado(index: number) {
     const pedido = this.pedidos[index];
-    if (!pedido) return; // If I press '5' but there are only 3 orders, do nothing.
+    if (!pedido) return;
 
     if (pedido.estado === 'pendiente') {
       pedido.estado = 'preparacion';
     } else if (pedido.estado === 'preparacion') {
       pedido.estado = 'listo';
     } else {
-      this.pedidos.splice(index, 1);
+      this.pedidos.splice(index, 1); // Deliver / Clear order from board
     }
 
     this.socket.actualizarPedidos(this.pedidos);

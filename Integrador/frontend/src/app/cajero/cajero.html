@@ -1,44 +1,34 @@
 <div class="contenedor">
-    <!-- PANEL IZQUIERDO -->
     <div class="pedido">
         <h1>CAPITÁN BURGER</h1>
         <div class="lista-pedido">
-            <div
-                *ngFor="let item of carrito; let i = index"
-                class="item">
+            <div *ngFor="let item of carrito; let i = index" class="item">
                 <div>
                     <strong>{{ item.nombre }}</strong>
-                    <p>{{ item.tamanio }}</p>
+                    <p>{{ item.tamano }}</p>
                     <small *ngIf="item.extras.length">
-                        Extras:
-                        {{ item.extras.join(', ') }}
+                        Extras: {{ item.extras.join(', ') }}
                     </small>
                     <br>
                     <small *ngIf="item.observacion">
-                        Obs:
-                        {{ item.observacion }}
+                        Obs: {{ item.observacion }}
                     </small>
                 </div>
                 <div class="derecha-item">
                     <p>S/ {{ item.precio }}</p>
-                    <button
-                        class="eliminar"
-                        (click)="eliminar(i)">
-                        ✕
-                    </button>
+                    <button class="eliminar" (click)="eliminar(i)">✕</button>
                 </div>
             </div>
         </div>
         <div class="footer">
             <h2>Total: S/ {{ total }}</h2>
-            <button class="confirmar">
+            <button class="confirmar" (click)="confirmarPedido()">
                 Confirmar Pedido
             </button>
         </div>
     </div>
-    <!-- PANEL DERECHO -->
+
     <div class="panel">
-        <!-- CATEGORÍAS -->
         <div class="categorias">
             <button
                 *ngFor="let c of categorias"
@@ -47,7 +37,6 @@
                 {{ c.nombre }}
             </button>
         </div>
-        <!-- PRODUCTOS -->
         <div class="productos">
             <button
                 *ngFor="let p of productosFiltrados"
@@ -57,7 +46,6 @@
                 <span>S/ {{ p.precio }}</span>
             </button>
         </div>
-        <!-- TAMAÑOS -->
         <div class="extras-box">
             <h3>Tamaño</h3>
             <div class="extras">
@@ -69,7 +57,6 @@
                 </button>
             </div>
         </div>
-        <!-- INGREDIENTES -->
         <div class="extras-box">
             <h3>Ingredientes Extra</h3>
             <div class="extras">
@@ -81,7 +68,6 @@
                 </button>
             </div>
         </div>
-        <!-- OBSERVACIONES -->
         <div class="extras-box">
             <h3>Observaciones</h3>
             <textarea

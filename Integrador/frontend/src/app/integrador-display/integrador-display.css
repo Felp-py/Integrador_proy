@@ -1,121 +1,118 @@
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #f5f5f5;
-}
-
-.header {
-  background: linear-gradient(90deg, #9E3B3B, #FFCDC9);
-  color: white;
-  text-align: center;
-  padding: 15px;
-  border-bottom-left-radius: 40px;
-  border-bottom-right-radius: 40px;
-}
-
-.acciones {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 15px;
-}
-
-button {
-  padding: 10px 15px;
-  border: none;
-  background: #9E3B3B;
-  color: white;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-button:hover {
-  background: #FFC7A7;
-}
-
 .grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  padding: 10px;
+  display: flex;
+  gap: 15px;
+  padding: 20px;
+  justify-content: space-between;
 }
 
 .columna {
-  background: #ffffff;
-  border-radius: 15px;
-  padding: 10px;
-  min-height: 300px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 250px;
 }
 
 .pedido {
-  color: white;
-  margin-bottom: 10px;
-  padding: 15px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  background: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
 }
 
-.pedido.pendiente {
-  background: #98A1BC;
-}
+.pedido.pendiente { border-color: #f1c40f; }
+.pedido.preparacion { border-color: #3498db; }
+.pedido.listo { border-color: #2ecc71; }
 
-.pedido.preparacion {
-  background: #FFDBB6;
-}
-
-.pedido.listo {
-  background: #A8BBA3;
-}
-
-.estado {
-  font-weight: bold;
-  margin: 5px 0;
-}
-
-.popup {
-  position: fixed;
-  top: 10%;
-  left: 25%;
-  width: 50%;
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-}
-
-.item {
+.pedido-header {
+  background: #f8f9fa;
+  padding: 10px;
   display: flex;
   justify-content: space-between;
-  margin: 10px 0;
+  align-items: center;
+  border-bottom: 1px solid #eee;
 }
 
-.nav {
+.pedido-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.tecla-shortcut {
+  background: #222;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-bottom: 2px solid #000;
+}
+
+.pedido-body {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.ticket-item {
+  border-bottom: 1px dashed #ccc;
+  padding: 8px 0;
+}
+
+.ticket-item:last-child {
+  border-bottom: none;
+}
+
+.item-main {
   display: flex;
-  justify-content: center;
-  margin: 10px;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.pedido {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 10px;
+.badge-tamano {
+  font-size: 0.75rem;
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #333;
+}
+
+.item-extras {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.item-obs {
+  color: #7f8c8d;
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.estado-label {
+  margin-top: 15px;
+  font-weight: bold;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.pedido-footer button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #2c3e50;
   color: white;
   font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-/* estados */
-.pendiente {
-  background-color: #e74c3c; /* rojo */
-}
-
-.preparacion {
-  background-color: #f1c40f; /* amarillo */
-  color: black;
-}
-
-.listo {
-  background-color: #2ecc71; /* verde */
+.pedido-footer button:hover {
+  background: #34495e;
 }

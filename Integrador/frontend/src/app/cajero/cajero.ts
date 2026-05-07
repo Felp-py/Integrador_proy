@@ -17,7 +17,6 @@ interface Item {
   templateUrl: './cajero.html',
   styleUrls: ['./cajero.css']
 })
-
 export class Cajero {
 
   constructor(private socket: SocketService) {}
@@ -26,12 +25,7 @@ export class Cajero {
   categoriaSeleccionada = 'Hamburguesas';
   observacion = '';
 
-  tamanos = [
-  'Personal',
-  'Mediana',
-  'Grande'
-];
-
+  tamanos = ['Personal', 'Mediana', 'Grande'];
   tamanoSeleccionado = 'Personal';
 
   ingredientesExtra = [
@@ -47,167 +41,33 @@ export class Cajero {
   extrasSeleccionados: string[] = [];
 
   categorias = [
-    {
-      nombre:'Hamburguesas',
-      color : '#6b3e26'
-    },
-    {
-      nombre:'Combos',
-      color : '#d89b45'
-    },
-    {
-      nombre:'Bebidas',
-      color : '#4a90e2'
-    },
-    {
-      nombre:'Complementos',
-      color : '#4caf50'
-    }
+    { nombre: 'Hamburguesas', color: '#6b3e26' },
+    { nombre: 'Combos', color: '#d89b45' },
+    { nombre: 'Bebidas', color: '#4a90e2' },
+    { nombre: 'Complementos', color: '#4caf50' }
   ];
   
   productos: Item[] = [
-    {
-      nombre: 'Cheddar Burger',
-      precio: 18,
-      categoria: 'Hamburguesas',
-      color: '#6B3E26'
-    },
-
-    {
-      nombre: 'Royal Burger',
-      precio: 22,
-      categoria: 'Hamburguesas',
-      color: '#6B3E26'
-    },
-
-    {
-      nombre: 'Doble Carne',
-      precio: 25,
-      categoria: 'Hamburguesas',
-      color: '#6B3E26'
-    },
-
-    {
-      nombre: 'BBQ Burger',
-      precio: 24,
-      categoria: 'Hamburguesas',
-      color: '#6B3E26'
-    },
-
-    {
-      nombre: 'Burger Jalapeño',
-      precio: 26,
-      categoria: 'Hamburguesas',
-      color: '#6B3E26'
-    },
-
-    {
-      nombre: 'Cheese Bacon',
-      precio: 27,
-      categoria: 'Hamburguesas',
-      color: '#6B3E26'
-    },
-    {
-      nombre: 'Combo Cheddar',
-      precio: 32,
-      categoria: 'Combos',
-      color: '#D89B45'
-    },
-
-    {
-      nombre: 'Combo Royal',
-      precio: 35,
-      categoria: 'Combos',
-      color: '#D89B45'
-    },
-
-    {
-      nombre: 'Mega Combo',
-      precio: 40,
-      categoria: 'Combos',
-      color: '#D89B45'
-    },
-
-    {
-      nombre: 'Combo Familiar',
-      precio: 55,
-      categoria: 'Combos',
-      color: '#D89B45'
-    },
-
-    // BEBIDAS
-
-    {
-      nombre: 'Coca Cola',
-      precio: 5,
-      categoria: 'Bebidas',
-      color: '#4A90E2'
-    },
-
-    {
-      nombre: 'Inca Kola',
-      precio: 5,
-      categoria: 'Bebidas',
-      color: '#4A90E2'
-    },
-
-    {
-      nombre: 'Sprite',
-      precio: 5,
-      categoria: 'Bebidas',
-      color: '#4A90E2'
-    },
-
-    {
-      nombre: 'Fanta',
-      precio: 5,
-      categoria: 'Bebidas',
-      color: '#4A90E2'
-    },
-
-    {
-      nombre: 'Milkshake',
-      precio: 12,
-      categoria: 'Bebidas',
-      color: '#4A90E2'
-    },
-
-    // COMPLEMENTOS
-
-    {
-      nombre: 'Papas Fritas',
-      precio: 8,
-      categoria: 'Complementos',
-      color: '#4CAF50'
-    },
-
-    {
-      nombre: 'Nuggets',
-      precio: 10,
-      categoria: 'Complementos',
-      color: '#4CAF50'
-    },
-
-    {
-      nombre: 'Aros de Cebolla',
-      precio: 9,
-      categoria: 'Complementos',
-      color: '#4CAF50'
-    },
-
-    {
-      nombre: 'Alitas BBQ',
-      precio: 15,
-      categoria: 'Complementos',
-      color: '#4CAF50'
-    },
-
-    {
-      nombre: 'Papas Cheddar',
-      precio: 14,
-      categoria: 'Complementos',
-      color: '#4CAF50'
-    }
+    { nombre: 'Cheddar Burger', precio: 18, categoria: 'Hamburguesas', color: '#6B3E26' },
+    { nombre: 'Royal Burger', precio: 22, categoria: 'Hamburguesas', color: '#6B3E26' },
+    { nombre: 'Doble Carne', precio: 25, categoria: 'Hamburguesas', color: '#6B3E26' },
+    { nombre: 'BBQ Burger', precio: 24, categoria: 'Hamburguesas', color: '#6B3E26' },
+    { nombre: 'Burger Jalapeño', precio: 26, categoria: 'Hamburguesas', color: '#6B3E26' },
+    { nombre: 'Cheese Bacon', precio: 27, categoria: 'Hamburguesas', color: '#6B3E26' },
+    { nombre: 'Combo Cheddar', precio: 32, categoria: 'Combos', color: '#D89B45' },
+    { nombre: 'Combo Royal', precio: 35, categoria: 'Combos', color: '#D89B45' },
+    { nombre: 'Mega Combo', precio: 40, categoria: 'Combos', color: '#D89B45' },
+    { nombre: 'Combo Familiar', precio: 55, categoria: 'Combos', color: '#D89B45' },
+    { nombre: 'Coca Cola', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
+    { nombre: 'Inca Kola', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
+    { nombre: 'Sprite', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
+    { nombre: 'Fanta', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
+    { nombre: 'Milkshake', precio: 12, categoria: 'Bebidas', color: '#4A90E2' },
+    { nombre: 'Papas Fritas', precio: 8, categoria: 'Complementos', color: '#4CAF50' },
+    { nombre: 'Nuggets', precio: 10, categoria: 'Complementos', color: '#4CAF50' },
+    { nombre: 'Aros de Cebolla', precio: 9, categoria: 'Complementos', color: '#4CAF50' },
+    { nombre: 'Alitas BBQ', precio: 15, categoria: 'Complementos', color: '#4CAF50' },
+    { nombre: 'Papas Cheddar', precio: 14, categoria: 'Complementos', color: '#4CAF50' }
   ];
 
   get productosFiltrados() {
@@ -219,19 +79,14 @@ export class Cajero {
   agregar(producto: Item) {
     let precioFinal = producto.precio;
 
-    if (this.tamanoSeleccionado === 'Mediana') {
-      precioFinal += 3;
-    }
-
-    if (this.tamanoSeleccionado === 'Grande') {
-      precioFinal += 6;
-    }
+    if (this.tamanoSeleccionado === 'Mediana') precioFinal += 3;
+    if (this.tamanoSeleccionado === 'Grande') precioFinal += 6;
 
     precioFinal += this.extrasSeleccionados.length * 2;
 
     this.carrito.push({
       ...producto,
-      tamaño: this.tamanoSeleccionado,
+      tamano: this.tamanoSeleccionado,
       extras: [...this.extrasSeleccionados],
       observacion: this.observacion,
       precio: precioFinal
@@ -259,20 +114,14 @@ export class Cajero {
   }
 
   confirmarPedido() {
-  if (this.carrito.length === 0) return;
+    if (this.carrito.length === 0) return;
 
-  const nombrePedido = this.carrito.map(i => i.nombre).join(', ');
+    this.socket.enviarPedido({
+      id: Date.now(),
+      items: [...this.carrito],
+      estado: 'pendiente'
+    });
 
-  console.log('🔥 CLICK CONFIRMAR'); // 👈 DEBUG 1
-
-  this.socket.enviarPedido({
-    id: Date.now(),
-    nombre: nombrePedido,
-    estado: 'pendiente'
-  });
-
-  console.log('📡 ENVIADO AL SOCKET'); // 👈 DEBUG 2
-
-  this.carrito = [];
-}
+    this.carrito = [];
+  }
 }
