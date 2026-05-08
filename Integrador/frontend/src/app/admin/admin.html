@@ -1,0 +1,50 @@
+<div class="contenedor-admin">
+    <div class="sidebar">
+        <h1>CAPITÁN BURGER</h1>
+        <h2>Panel Administrador </h2>
+        <div class="resumen-card">
+            <h3>Total Pedidos</h3>
+            <p>{{ historialPedidos.length }}</p>
+        </div>
+        <div class="resumen-card">
+            <h3>Ventas Totales</h3>
+            <p>S/ {{ totalVentas }}</p>
+        </div>
+        <button
+            class="logout-btn"
+            (click)="logout()">
+            Cerrar Sesión
+        </button>
+    </div>
+    <div class="panel">
+        <div class="header-panel">
+            <h2>Historial de Pedidos</h2>
+        </div>
+        <div class="tabla">
+            <div class="fila encabezado">
+                <span>Ticket</span>
+                <span>Estado</span>
+                <span>Items</span>
+                <span>Total</span>
+            </div>
+            <div
+                class="fila"
+                *ngFor="let pedido of historialPedidos">
+                <span>
+                    #{{ pedido.id }}
+                </span>
+                <span
+                    class="estado"
+                    [ngClass]="pedido.estado">
+                    {{ pedido.estado }}
+                </span>
+                <span>
+                    {{ pedido.items?.length || 0 }}
+                </span>
+                <span>
+                    S/ {{ pedido.items?.reduce((sum, item) => sum + item.precio, 0) || 0 }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

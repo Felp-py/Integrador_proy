@@ -12,35 +12,35 @@ export class SocketService {
   constructor() {
     this.socket = io('http://localhost:3000');
 
-    // 🔥 DEBUG: ver conexión
+    // DEBUG: ver conexión
     this.socket.on('connect', () => {
-      console.log('🟢 Conectado al socket');
+      console.log('Conectado al socket');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('🔴 Desconectado');
+      console.log('Desconectado');
     });
   }
 
-  // 🔥 ESCUCHAR EVENTO CORRECTO
+  //ESCUCHAR EVENTO CORRECTO
   escucharPedidos(): Observable<any> {
     return new Observable(observer => {
 
       this.socket.on('pedidosActualizados', (data) => {
-        console.log('🔥 evento recibido en service:', data);
+        console.log('evento recibido en service:', data);
         observer.next(data);
       });
 
     });
   }
 
-  // 🔥 ENVIAR PEDIDO
+  // ENVIAR PEDIDO
   enviarPedido(pedido: any) {
-    console.log('📤 enviando pedido:', pedido);
+    console.log('enviando pedido:', pedido);
     this.socket.emit('nuevoPedido', pedido);
   }
 
-  // 🔥 ACTUALIZAR
+  // ACTUALIZAR
   actualizarPedidos(pedidos: any[]) {
     this.socket.emit('actualizarPedidos', pedidos);
   }

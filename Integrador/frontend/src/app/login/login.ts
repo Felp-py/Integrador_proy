@@ -20,7 +20,7 @@ export class login {
   onSubmit() {
     const exito = this.authService.login(this.usuario, this.clave);
     if (!exito) {
-      this.errorMensaje = 'Usuario o contraseña incorrectos ❌';
+      this.errorMensaje = 'Usuario o contraseña incorrectos';
     }
   }
 }
