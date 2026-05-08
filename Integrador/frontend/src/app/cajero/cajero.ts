@@ -25,6 +25,9 @@ export class Cajero {
   categoriaSeleccionada = 'Hamburguesas';
   observacion = '';
 
+  productoSeleccionado: Item | null = null;
+  mostrarModal = false;
+
   tamanos = ['Personal', 'Mediana', 'Grande'];
   tamanoSeleccionado = 'Personal';
 
@@ -75,27 +78,40 @@ export class Cajero {
       producto => producto.categoria === this.categoriaSeleccionada
     );
   }
-  
-  agregar(producto: Item) {
-    let precioFinal = producto.precio;
 
-    if (this.tamanoSeleccionado === 'Mediana') precioFinal += 3;
-    if (this.tamanoSeleccionado === 'Grande') precioFinal += 6;
+  agregar(producto: Item) {
+    this.productoSeleccionado = producto;
+    this.mostrarModal = true;
+  }
+
+  confirmarProducto() {
+    if (!this.productoSeleccionado) return;
+    let precioFinal =
+      this.productoSeleccionado.precio;
+
+    if (this.tamanoSeleccionado === 'Mediana') {
+      precioFinal += 3;
+    }
+    if (this.tamanoSeleccionado === 'Grande') {
+      precioFinal += 6;
+    }
 
     precioFinal += this.extrasSeleccionados.length * 2;
-
     this.carrito.push({
-      ...producto,
+      ...this.productoSeleccionado,
       tamano: this.tamanoSeleccionado,
       extras: [...this.extrasSeleccionados],
       observacion: this.observacion,
       precio: precioFinal
     });
 
+    this.productoSeleccionado = null;
+    this.mostrarModal = false;
     this.extrasSeleccionados = [];
     this.observacion = '';
     this.tamanoSeleccionado = 'Personal';
   }
+  
 
   toggleExtra(extra: string) {
     if (this.extrasSeleccionados.includes(extra)) {

@@ -1,118 +1,185 @@
-.grid {
-  display: flex;
-  gap: 15px;
-  padding: 20px;
-  justify-content: space-between;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
-.columna {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  min-width: 250px;
+body{
+  font-family:'Segoe UI', sans-serif;
+  background:#f4f1ea;
 }
 
-.pedido {
-  background: #ffffff;
-  border-radius: 8px;
-  border: 2px solid #ccc;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: all 0.2s ease-in-out;
+.nav{
+  padding:20px;
 }
 
-.pedido.pendiente { border-color: #f1c40f; }
-.pedido.preparacion { border-color: #3498db; }
-.pedido.listo { border-color: #2ecc71; }
-
-.pedido-header {
-  background: #f8f9fa;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #eee;
+.nav button{
+  border:none;
+  background:#5b2d0f;
+  color:white;
+  padding:14px 22px;
+  border-radius:15px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
 }
 
-.pedido-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
+.nav button:hover{
+  background:#7a3c15;
 }
 
-.tecla-shortcut {
-  background: #222;
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.85rem;
-  font-weight: bold;
-  border-bottom: 2px solid #000;
+.header{
+  margin:0 20px 20px 20px;
+  background:white;
+  border-radius:25px;
+  padding:25px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
 }
 
-.pedido-body {
-  padding: 15px;
-  flex-grow: 1;
+.header h1{
+  color:#4b250f;
+  font-size:40px;
+  margin-bottom:10px;
 }
 
-.ticket-item {
-  border-bottom: 1px dashed #ccc;
-  padding: 8px 0;
+.header p{
+  color:#777;
+  font-size:15px;
 }
 
-.ticket-item:last-child {
-  border-bottom: none;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(350px,1fr));
+  gap:20px;
+  padding:20px;
 }
 
-.item-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.pedido{
+  background:white;
+  border-radius:25px;
+  overflow:hidden;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  transition:0.3s;
+  border-top:8px solid #ccc;
 }
 
-.badge-tamano {
-  font-size: 0.75rem;
-  background: #eee;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #333;
+.pedido:hover{
+  transform:translateY(-5px);
 }
 
-.item-extras {
-  color: #e74c3c;
-  font-size: 0.85rem;
-  margin-top: 2px;
+.pedido.pendiente{
+  border-top-color:#d89b45;
 }
 
-.item-obs {
-  color: #7f8c8d;
-  font-style: italic;
-  font-size: 0.85rem;
-  margin-top: 2px;
+.pedido.preparacion{
+  border-top-color:#4a90e2;
 }
 
-.estado-label {
-  margin-top: 15px;
-  font-weight: bold;
-  text-align: right;
-  font-size: 0.9rem;
+.pedido.listo{
+  border-top-color:#4caf50;
 }
 
-.pedido-footer button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  background: #2c3e50;
-  color: white;
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
+.pedido-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+  border-bottom:1px solid #eee;
 }
 
-.pedido-footer button:hover {
-  background: #34495e;
+.pedido-header h2{
+  color:#4b250f;
+  font-size:28px;
+}
+
+.tecla-shortcut{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  background:#5b2d0f;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+}
+
+.pedido-body{
+  padding:20px;
+}
+
+.ticket-item{
+  padding-bottom:15px;
+  margin-bottom:15px;
+  border-bottom:1px dashed #ddd;
+}
+
+.ticket-item:last-child{
+  border-bottom:none;
+}
+
+.item-main{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.item-main strong{
+  color:#2c2c2c;
+  font-size:18px;
+}
+
+.badge-tamano{
+  background:#f5d5a7;
+  color:#4b250f;
+  padding:6px 12px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.item-extras{
+  margin-top:8px;
+  color:#d35400;
+  font-size:14px;
+}
+
+.item-obs{
+  margin-top:8px;
+  color:#777;
+  font-style:italic;
+  font-size:14px;
+}
+
+.estado-label{
+  margin-top:20px;
+  text-align:right;
+  font-weight:bold;
+  color:#4b250f;
+}
+
+.estado-label span{
+  color:#5b2d0f;
+}
+
+.pedido-footer{
+  padding:20px;
+}
+
+.pedido-footer button{
+  width:100%;
+  border:none;
+  background:#5b2d0f;
+  color:white;
+  padding:16px;
+  border-radius:18px;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.pedido-footer button:hover{
+  background:#7a3c15;
 }

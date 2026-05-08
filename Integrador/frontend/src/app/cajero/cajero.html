@@ -1,6 +1,6 @@
 <div class="contenedor">
     <div class="pedido">
-        <h1>CAPITÁN BURGER</h1>
+        <h1>CAPITÁN BURGER </h1>
         <div class="lista-pedido">
             <div *ngFor="let item of carrito; let i = index" class="item">
                 <div>
@@ -16,18 +16,23 @@
                 </div>
                 <div class="derecha-item">
                     <p>S/ {{ item.precio }}</p>
-                    <button class="eliminar" (click)="eliminar(i)">✕</button>
+                    <button
+                        class="eliminar"
+                        (click)="eliminar(i)">
+                        ✕
+                    </button>
                 </div>
             </div>
         </div>
         <div class="footer">
             <h2>Total: S/ {{ total }}</h2>
-            <button class="confirmar" (click)="confirmarPedido()">
+            <button
+                class="confirmar"
+                (click)="confirmarPedido()">
                 Confirmar Pedido
             </button>
         </div>
     </div>
-
     <div class="panel">
         <div class="categorias">
             <button
@@ -37,6 +42,7 @@
                 {{ c.nombre }}
             </button>
         </div>
+
         <div class="productos">
             <button
                 *ngFor="let p of productosFiltrados"
@@ -46,6 +52,18 @@
                 <span>S/ {{ p.precio }}</span>
             </button>
         </div>
+    </div>
+</div>
+<div
+    class="modal-overlay"
+    *ngIf="mostrarModal">
+    <div class="modal-box">
+        <h2>
+            {{ productoSeleccionado?.nombre }}
+        </h2>
+        <p class="precio-modal">
+            S/ {{ productoSeleccionado?.precio }}
+        </p>
         <div class="extras-box">
             <h3>Tamaño</h3>
             <div class="extras">
@@ -74,6 +92,18 @@
                 [(ngModel)]="observacion"
                 placeholder="Ej: sin cebolla, extra salsa...">
             </textarea>
+        </div>
+        <div class="acciones-modal">
+            <button
+                class="cancelar"
+                (click)="mostrarModal = false">
+                Cancelar
+            </button>
+            <button
+                class="agregar-btn"
+                (click)="confirmarProducto()">
+                Agregar al Pedido
+            </button>
         </div>
     </div>
 </div>

@@ -1,44 +1,108 @@
-.login-contenedor {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f4f4f9;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
-.login-card {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  text-align: center;
-  width: 100%;
-  max-width: 400px;
+body{
+  font-family:'Segoe UI', sans-serif;
+  background:#f4f1ea;
 }
-.campo {
-  margin-bottom: 15px;
-  text-align: left;
+
+.login-contenedor{
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
 }
-.campo label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+
+.login-card{
+  width:100%;
+  max-width:450px;
+  background:white;
+  padding:40px;
+  border-radius:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  text-align:center;
+  animation:aparecer 0.4s ease;
 }
-.campo input {
-  width: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+
+@keyframes aparecer{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
-.btn-ingresar {
-  width: 100%;
-  padding: 12px;
-  background-color: #ff9800;
-  color: white;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 4px;
+
+.login-card h1{
+  color:#4b250f;
+  font-size:42px;
+  margin-bottom:10px;
 }
-.btn-ingresar:hover { background-color: #e65100; }
-.error { color: red; font-size: 0.9rem; margin-top: 10px; }
+
+.login-card h2{
+  color:#777;
+  font-size:18px;
+  margin-bottom:35px;
+  font-weight:normal;
+}
+
+.campo{
+  margin-bottom:20px;
+  text-align:left;
+}
+
+.campo label{
+  display:block;
+  margin-bottom:8px;
+  color:#4b250f;
+  font-weight:bold;
+  font-size:15px;
+}
+
+.campo input{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:#f8f5ef;
+  font-size:15px;
+  outline:none;
+  transition:0.3s;
+}
+
+.campo input:focus{
+  background:white;
+  box-shadow:0 0 0 3px #f5d5a7;
+}
+
+.btn-ingresar{
+  width:100%;
+  margin-top:15px;
+  border:none;
+  padding:18px;
+  border-radius:18px;
+  background:#5b2d0f;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.btn-ingresar:hover{
+  background:#7a3c15;
+  transform:translateY(-2px);
+}
+
+.error{
+  margin-top:10px;
+  color:#d63031;
+  font-size:14px;
+  text-align:center;
+}

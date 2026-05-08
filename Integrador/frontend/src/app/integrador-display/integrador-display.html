@@ -1,9 +1,9 @@
 <div class="nav">
-  <button routerLink="/cajero">Ir a Cajero 💳</button>
+  <button routerLink="/login">Ir a login</button>
 </div>
 
 <div class="header">
-  <h1>CAPITÁN BURGER - COCINA 👨‍🍳</h1>
+  <h1>CAPITÁN BURGER - COCINA</h1>
   <p>{{ fechaActual }}</p>
 </div>
 
@@ -24,11 +24,11 @@
           </div>
           
           <div *ngIf="item.extras && item.extras.length" class="item-extras">
-            <small>➕ {{ item.extras.join(', ') }}</small>
+            <small>{{ item.extras.join(', ') }}</small>
           </div>
           
           <div *ngIf="item.observacion" class="item-obs">
-            <small>📝 " {{ item.observacion }} "</small>
+            <small>" {{ item.observacion }} "</small>
           </div>
         </div>
         
@@ -38,9 +38,9 @@
       <div class="pedido-footer">
         <button (click)="cambiarEstado(p.originalIndex)">
           {{
-            p.estado === 'pendiente' ? 'Iniciar 👨‍🍳' :
-            p.estado === 'preparacion' ? 'Listo 🔔' :
-            'Entregar 📦'
+            p.estado === 'pendiente' ? 'Iniciar' :
+            p.estado === 'preparacion' ? 'Listo' :
+            'Entregar'
           }}
         </button>
       </div>
