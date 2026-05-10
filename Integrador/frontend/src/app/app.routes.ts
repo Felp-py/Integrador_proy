@@ -2,13 +2,13 @@ import { Routes } from '@angular/router';
 import { login } from './login/login';
 import { Cajero } from './cajero/cajero';
 import { IntegradorDisplay } from './integrador-display/integrador-display';
+import { Admin } from './admin/admin';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: login },
   
-  // 🔐 Protected routes
   { 
     path: 'cajero', 
     component: Cajero, 
@@ -16,7 +16,13 @@ export const routes: Routes = [
     data: { role: 'cajero' } 
   },
   { 
-    path: 'cocina', // Assuming your display route is called cocina
+    path: 'admin', 
+    component: Admin, 
+    canActivate: [authGuard], 
+    data: { role: 'admin' } 
+  },
+  { 
+    path: 'cocina', 
     component: IntegradorDisplay, 
     canActivate: [authGuard], 
     data: { role: 'cocina' } 

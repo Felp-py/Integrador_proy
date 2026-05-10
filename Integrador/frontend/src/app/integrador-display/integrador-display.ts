@@ -21,11 +21,13 @@ export class IntegradorDisplay implements OnInit {
   columnas: any[][] = [[], [], [], []];
   fechaActual = '';
 
-  // ⌨️ KEYBOARD SHORTCUTS (Press 0-9 to advance orders instantly)
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-      return; // Ignore shortcut if the user is typing in an input field
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement
+    ) {
+      return;
     }
     const key = event.key;
     if (key >= '0' && key <= '9') {
@@ -36,11 +38,11 @@ export class IntegradorDisplay implements OnInit {
 
   ngOnInit() {
     this.actualizarReloj();
-    setInterval(() => this.actualizarReloj(), 1000);
-
-    // 📡 Socket listener receiving the new structured orders array
+    setInterval(() => {
+      this.actualizarReloj();
+    }, 1000);
     this.socket.escucharPedidos().subscribe((data: any) => {
-      console.log('📡 Pedidos actualizados en cocina:', data);
+      console.log('Pedidos actualizados:', data);
       this.pedidos = data;
       this.actualizarColumnas();
       this.cdr.detectChanges();
@@ -54,25 +56,41 @@ export class IntegradorDisplay implements OnInit {
 
   actualizarColumnas() {
     const cols: any[][] = [[], [], [], []];
-    this.pedidos.forEach((pedido, index) => {
-      // Retain reference to original index for trackable button/keyboard interactions
-      cols[index % 4].push({ ...pedido, originalIndex: index });
+
+    const pedidosVisibles = this.pedidos.filter(
+      p => p.estado !== 'entregado'
+    );
+
+    pedidosVisibles.forEach((pedido, index) => {
+      cols[index % 4].push({
+        ...pedido,
+        originalIndex: index
+      });
     });
     this.columnas = cols;
   }
 
   cambiarEstado(index: number) {
-    const pedido = this.pedidos[index];
+    const pedidosVisibles = this.pedidos.filter(
+      p => p.estado !== 'entregado'
+    );
+    const pedidoVisible = pedidosVisibles[index];
+    if (!pedidoVisible) return;
+    const pedido = this.pedidos.find(
+      p => p.id === pedidoVisible.id
+    );
+
     if (!pedido) return;
 
     if (pedido.estado === 'pendiente') {
       pedido.estado = 'preparacion';
-    } else if (pedido.estado === 'preparacion') {
-      pedido.estado = 'listo';
-    } else {
-      this.pedidos.splice(index, 1); // Deliver / Clear order from board
     }
-
+    else if (pedido.estado === 'preparacion') {
+      pedido.estado = 'listo';
+    }
+    else if (pedido.estado === 'listo') {
+      pedido.estado = 'entregado';
+    }
     this.socket.actualizarPedidos(this.pedidos);
     this.actualizarColumnas();
     this.cdr.detectChanges();

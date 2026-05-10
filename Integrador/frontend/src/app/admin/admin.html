@@ -1,13 +1,13 @@
 <div class="contenedor-admin">
     <div class="sidebar">
         <h1>CAPITÁN BURGER</h1>
-        <h2>Panel Administrador </h2>
+        <h2>Administrador</h2>
         <div class="resumen-card">
             <h3>Total Pedidos</h3>
             <p>{{ historialPedidos.length }}</p>
         </div>
         <div class="resumen-card">
-            <h3>Ventas Totales</h3>
+            <h3>Total Ventas</h3>
             <p>S/ {{ totalVentas }}</p>
         </div>
         <button
@@ -20,30 +20,52 @@
         <div class="header-panel">
             <h2>Historial de Pedidos</h2>
         </div>
-        <div class="tabla">
-            <div class="fila encabezado">
-                <span>Ticket</span>
-                <span>Estado</span>
-                <span>Items</span>
-                <span>Total</span>
-            </div>
-            <div
-                class="fila"
-                *ngFor="let pedido of historialPedidos">
-                <span>
-                    #{{ pedido.id }}
-                </span>
-                <span
-                    class="estado"
-                    [ngClass]="pedido.estado">
+        <h3 style="margin-bottom:20px;color:#5b2d0f">
+            Pedidos recibidos:
+            {{ historialPedidos.length }}
+        </h3>
+        <div
+            class="sin-pedidos"
+            *ngIf="historialPedidos.length === 0">
+            No hay pedidos todavía 
+        </div>
+        <div
+            class="pedido-card"
+            *ngFor="let pedido of historialPedidos">
+            <div class="pedido-header">
+                <h3>
+                    Ticket #{{ pedido.numero }}
+                </h3>
+                <span class="estado">
                     {{ pedido.estado }}
                 </span>
-                <span>
-                    {{ pedido.items?.length || 0 }}
-                </span>
-                <span>
-                    S/ {{ pedido.items?.reduce((sum, item) => sum + item.precio, 0) || 0 }}
-                </span>
+            </div>
+            <div
+                class="item"
+                *ngFor="let item of pedido.items">
+                <strong>
+                    {{ item.nombre }}
+                </strong>
+                <p>
+                    Tamaño:
+                    {{ item.tamano }}
+                </p>
+                <small *ngIf="item.extras?.length">
+                    Extras:
+                    {{ item.extras.join(', ') }}
+                </small>
+                <br>
+                <small *ngIf="item.observacion">
+                    Obs:
+                    {{ item.observacion }}
+                </small>
+                <div class="precio">
+                    S/ {{ item.precio }}
+                </div>
+            </div>
+            <div class="total">
+                Total:
+                S/ {{ getTotalPedido(pedido) }}
             </div>
         </div>
     </div>

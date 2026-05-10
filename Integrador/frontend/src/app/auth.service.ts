@@ -5,18 +5,16 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private loggedInUserRole: 'cajero' | 'cocina' | 'admin ' | null = null;
+  private loggedInUserRole: 'cajero' | 'cocina' | 'admin' | null = null;
 
   constructor(private router: Router) {
-    // Check if user session survived a page reload
     const savedRole = localStorage.getItem('userRole');
     if (savedRole) {
-      this.loggedInUserRole = savedRole as 'cajero' | 'cocina' | 'admin ';
+      this.loggedInUserRole = savedRole as 'cajero' | 'cocina' | 'admin';
     }
   }
 
   login(usuario: string, clave: string): boolean {
-    // Hardcoded credentials for Capitán Burger staff
     if (usuario === 'caja1' && clave === 'burger123') {
       this.setSession('cajero');
       this.router.navigate(['/cajero']);
@@ -26,14 +24,14 @@ export class AuthService {
       this.router.navigate(['/cocina']);
       return true;
     } else if (usuario === 'admin1' && clave === 'admin123') {
-      this.setSession('admin ');
+      this.setSession('admin');
       this.router.navigate(['/admin']);
       return true;
     }
     return false;
   }
 
-  private setSession(role: 'cajero' | 'cocina' | 'admin ') {
+  private setSession(role: 'cajero' | 'cocina' | 'admin') {
     this.loggedInUserRole = role;
     localStorage.setItem('userRole', role);
   }
