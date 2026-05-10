@@ -12,7 +12,6 @@ export class SocketService {
   constructor() {
     this.socket = io('http://localhost:3000');
 
-    // DEBUG: ver conexión
     this.socket.on('connect', () => {
       console.log('Conectado al socket');
     });
@@ -22,7 +21,6 @@ export class SocketService {
     });
   }
 
-  //ESCUCHAR EVENTO CORRECTO
   escucharPedidos(): Observable<any> {
     return new Observable(observer => {
 
@@ -34,13 +32,11 @@ export class SocketService {
     });
   }
 
-  // ENVIAR PEDIDO
   enviarPedido(pedido: any) {
     console.log('enviando pedido:', pedido);
     this.socket.emit('nuevoPedido', pedido);
   }
 
-  // ACTUALIZAR
   actualizarPedidos(pedidos: any[]) {
     this.socket.emit('actualizarPedidos', pedidos);
   }

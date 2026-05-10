@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SocketService } from '../socket'; 
+import { SocketService } from '../socket';
 
 interface Item {
   nombre: string;
@@ -19,15 +20,18 @@ interface Item {
 })
 export class Cajero {
 
-  constructor(private socket: SocketService) {}
+  constructor(
+    private socket: SocketService,
+    private router: Router
+  ) {}
 
   carrito: any[] = [];
   categoriaSeleccionada = 'Hamburguesas';
   observacion = '';
-
   productoSeleccionado: Item | null = null;
   mostrarModal = false;
-
+  mostrarPago = false;
+  metodoPago = 'Efectivo';
   tamanos = ['Personal', 'Mediana', 'Grande'];
   tamanoSeleccionado = 'Personal';
 
@@ -37,7 +41,7 @@ export class Cajero {
     'Cebolla extra',
     'Lechuga extra',
     'Tomate extra',
-    'Salsa BQQ',
+    'Salsa BBQ',
     'Huevo extra'
   ];
 
@@ -49,28 +53,41 @@ export class Cajero {
     { nombre: 'Bebidas', color: '#4a90e2' },
     { nombre: 'Complementos', color: '#4caf50' }
   ];
-  
+
   productos: Item[] = [
+
+    // HAMBURGUESAS
+
     { nombre: 'Cheddar Burger', precio: 18, categoria: 'Hamburguesas', color: '#6B3E26' },
     { nombre: 'Royal Burger', precio: 22, categoria: 'Hamburguesas', color: '#6B3E26' },
     { nombre: 'Doble Carne', precio: 25, categoria: 'Hamburguesas', color: '#6B3E26' },
     { nombre: 'BBQ Burger', precio: 24, categoria: 'Hamburguesas', color: '#6B3E26' },
     { nombre: 'Burger Jalapeño', precio: 26, categoria: 'Hamburguesas', color: '#6B3E26' },
     { nombre: 'Cheese Bacon', precio: 27, categoria: 'Hamburguesas', color: '#6B3E26' },
+
+    // COMBOS
+
     { nombre: 'Combo Cheddar', precio: 32, categoria: 'Combos', color: '#D89B45' },
     { nombre: 'Combo Royal', precio: 35, categoria: 'Combos', color: '#D89B45' },
     { nombre: 'Mega Combo', precio: 40, categoria: 'Combos', color: '#D89B45' },
     { nombre: 'Combo Familiar', precio: 55, categoria: 'Combos', color: '#D89B45' },
+
+    // BEBIDAS
+
     { nombre: 'Coca Cola', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
     { nombre: 'Inca Kola', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
     { nombre: 'Sprite', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
     { nombre: 'Fanta', precio: 5, categoria: 'Bebidas', color: '#4A90E2' },
     { nombre: 'Milkshake', precio: 12, categoria: 'Bebidas', color: '#4A90E2' },
+
+    // COMPLEMENTOS
+
     { nombre: 'Papas Fritas', precio: 8, categoria: 'Complementos', color: '#4CAF50' },
     { nombre: 'Nuggets', precio: 10, categoria: 'Complementos', color: '#4CAF50' },
     { nombre: 'Aros de Cebolla', precio: 9, categoria: 'Complementos', color: '#4CAF50' },
     { nombre: 'Alitas BBQ', precio: 15, categoria: 'Complementos', color: '#4CAF50' },
     { nombre: 'Papas Cheddar', precio: 14, categoria: 'Complementos', color: '#4CAF50' }
+
   ];
 
   get productosFiltrados() {
@@ -86,6 +103,11 @@ export class Cajero {
     );
   }
 
+  agregar(producto: Item) {
+    this.productoSeleccionado = producto;
+    this.mostrarModal = true;
+  }
+
   cerrarModal() {
     this.mostrarModal = false;
     this.productoSeleccionado = null;
@@ -94,23 +116,15 @@ export class Cajero {
     this.tamanoSeleccionado = 'Personal';
   }
 
-  agregar(producto: Item) {
-    this.productoSeleccionado = producto;
-    this.mostrarModal = true;
-  }
-
   confirmarProducto() {
     if (!this.productoSeleccionado) return;
-    let precioFinal =
-      this.productoSeleccionado.precio;
-
+    let precioFinal = this.productoSeleccionado.precio;
     if (this.tamanoSeleccionado === 'Mediana') {
       precioFinal += 3;
     }
     if (this.tamanoSeleccionado === 'Grande') {
       precioFinal += 6;
     }
-
     precioFinal += this.extrasSeleccionados.length * 2;
     this.carrito.push({
       ...this.productoSeleccionado,
@@ -120,17 +134,13 @@ export class Cajero {
       precio: precioFinal
     });
 
-    this.productoSeleccionado = null;
-    this.mostrarModal = false;
-    this.extrasSeleccionados = [];
-    this.observacion = '';
-    this.tamanoSeleccionado = 'Personal';
+    this.cerrarModal();
   }
-  
 
   toggleExtra(extra: string) {
     if (this.extrasSeleccionados.includes(extra)) {
-      this.extrasSeleccionados = this.extrasSeleccionados.filter(e => e !== extra);
+      this.extrasSeleccionados =
+        this.extrasSeleccionados.filter(e => e !== extra);
     } else {
       this.extrasSeleccionados.push(extra);
     }
@@ -141,18 +151,30 @@ export class Cajero {
   }
 
   get total() {
-    return this.carrito.reduce((sum, i) => sum + i.precio, 0);
+    return this.carrito.reduce(
+      (sum, item) => sum + item.precio,
+      0
+    );
   }
 
-  confirmarPedido() {
+  abrirPago() {
     if (this.carrito.length === 0) return;
+    this.mostrarPago = true;
+  }
 
+  procesarPago() {
     this.socket.enviarPedido({
       id: Date.now(),
       items: [...this.carrito],
-      estado: 'pendiente'
+      estado: 'pendiente',
+      pago: this.metodoPago
     });
-
     this.carrito = [];
+    this.mostrarPago = false;
+    alert('Pago realizado correctamente');
+  }
+
+  volverLogin() {
+    this.router.navigate(['/login']);
   }
 }

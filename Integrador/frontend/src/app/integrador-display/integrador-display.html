@@ -9,13 +9,11 @@
 
 <div class="grid">
   <div class="columna" *ngFor="let col of columnas">
-
     <div class="pedido" *ngFor="let p of col" [ngClass]="p.estado">
       
       <div class="pedido-header">
         <span class="tecla-shortcut">{{ p.originalIndex }}</span>
         <h2>Ticket #{{ p.id.toString().slice(-4) }}</h2> </div>
-
       <div class="pedido-body">
         <div *ngFor="let item of p.items" class="ticket-item">
           <div class="item-main">
@@ -34,7 +32,6 @@
         
         <p class="estado-label">Estado: <span>{{ p.estado | uppercase }}</span></p>
       </div>
-
       <div class="pedido-footer">
         <button (click)="cambiarEstado(p.originalIndex)">
           {{
@@ -44,8 +41,6 @@
           }}
         </button>
       </div>
-
     </div>
-
   </div>
 </div>

@@ -1,35 +1,22 @@
-/* ========================= */
-/* RESET */
-/* ========================= */
-
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
 
-/* ========================= */
 /* BODY */
-/* ========================= */
-
 body{
     font-family:'Segoe UI', sans-serif;
     background:#f4f1ea;
 }
 
-/* ========================= */
 /* CONTENEDOR */
-/* ========================= */
-
 .contenedor{
     display:flex;
     height:100vh;
 }
 
-/* ========================= */
 /* PANEL IZQUIERDO */
-/* ========================= */
-
 .pedido{
     width:30%;
     background:white;
@@ -46,20 +33,14 @@ body{
     font-size:38px;
 }
 
-/* ========================= */
 /* LISTA PEDIDOS */
-/* ========================= */
-
 .lista-pedido{
     flex:1;
     overflow-y:auto;
     padding-right:5px;
 }
 
-/* ========================= */
 /* ITEM */
-/* ========================= */
-
 .item{
     background:#fff5e8;
     border:3px solid #d8b787;
@@ -86,20 +67,14 @@ body{
     color:#666;
 }
 
-/* ========================= */
 /* PRECIO */
-/* ========================= */
-
 .derecha-item{
     text-align:center;
     font-weight:bold;
     color:#4b250f;
 }
 
-/* ========================= */
 /* BOTÓN ELIMINAR */
-/* ========================= */
-
 .eliminar{
     width:35px;
     height:35px;
@@ -117,10 +92,7 @@ body{
     background:#7a3c15;
 }
 
-/* ========================= */
 /* FOOTER */
-/* ========================= */
-
 .footer{
     margin-top:20px;
 }
@@ -131,10 +103,7 @@ body{
     font-size:32px;
 }
 
-/* ========================= */
 /* BOTÓN CONFIRMAR */
-/* ========================= */
-
 .confirmar{
     width:100%;
     padding:18px;
@@ -153,10 +122,7 @@ body{
     transform:translateY(-2px);
 }
 
-/* ========================= */
 /* PANEL DERECHO */
-/* ========================= */
-
 .panel{
     flex:1;
     padding:25px 35px;
@@ -165,10 +131,7 @@ body{
     flex-direction:column;
 }
 
-/* ========================= */
 /* CATEGORÍAS */
-/* ========================= */
-
 .categorias{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -191,10 +154,7 @@ body{
     transform:translateY(-4px);
 }
 
-/* ========================= */
 /* PRODUCTOS */
-/* ========================= */
-
 .productos{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -230,10 +190,7 @@ body{
     color:#333;
 }
 
-/* ================================================= */
-/* ================= NUEVO MODAL =================== */
-/* ================================================= */
-
+/*  NUEVO MODAL  */
 .modal-overlay{
     position:fixed;
     top:0;
@@ -252,7 +209,6 @@ body{
 }
 
 /* CAJA MODAL */
-
 .modal-box{
     width:550px;
     max-height:90vh;
@@ -265,7 +221,6 @@ body{
 }
 
 /* ANIMACIÓN */
-
 @keyframes aparecer{
     from{
         transform:scale(0.8);
@@ -279,7 +234,6 @@ body{
 }
 
 /* TITULO MODAL */
-
 .modal-box h2{
     color:#4b250f;
     font-size:28px;
@@ -287,7 +241,6 @@ body{
 }
 
 /* PRECIO MODAL */
-
 .precio-modal{
     font-size:22px;
     font-weight:bold;
@@ -295,10 +248,7 @@ body{
     margin-bottom:18px;
 }
 
-/* ========================= */
 /* EXTRAS BOX */
-/* ========================= */
-
 .extras-box{
     background:#fffaf4;
     margin-top:15px;
@@ -313,10 +263,7 @@ body{
     font-size:18px;
 }
 
-/* ========================= */
 /* BOTONES EXTRAS */
-/* ========================= */
-
 .extras{
     display:flex;
     flex-wrap:wrap;
@@ -337,16 +284,11 @@ body{
     transform:scale(1.05);
 }
 
-/* BOTÓN ACTIVO */
 
 .extras .activo{
     background:#5b2d0f;
     color:white;
 }
-
-/* ========================= */
-/* TEXTAREA */
-/* ========================= */
 
 textarea{
     width:100%;
@@ -365,10 +307,6 @@ textarea:focus{
     border-color:#d89b45;
 }
 
-/* ========================= */
-/* BOTONES MODAL */
-/* ========================= */
-
 .acciones-modal{
     margin-top:18px;
     display:flex;
@@ -377,7 +315,6 @@ textarea:focus{
 }
 
 /* CANCELAR */
-
 .cancelar{
     padding:14px 22px;
     border:none;
@@ -392,8 +329,6 @@ textarea:focus{
     background:#c4c4c4;
 }
 
-/* AGREGAR */
-
 .agregar-btn{
     padding:14px 24px;
     border:none;
@@ -407,5 +342,100 @@ textarea:focus{
 
 .agregar-btn:hover{
     background:#7a3c15;
+    transform:translateY(-2px);
+}
+
+.volver-login{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:18px;
+    background:#d8b787;
+    color:#4b250f;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:12px;
+    transition:0.3s;
+}
+
+.volver-login:hover{
+    transform:translateY(-2px);
+    background:#c9a46d;
+}
+
+.modal-pago{
+    width:420px;
+    background:white;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+
+    animation:aparecer 0.25s ease;
+}
+
+.modal-pago h2{
+    color:#4b250f;
+    margin-bottom:20px;
+    font-size:30px;
+}
+
+.total-pago{
+    font-size:22px;
+    margin-bottom:25px;
+    color:#333;
+}
+
+.metodos{
+    display:flex;
+    gap:12px;
+    margin-bottom:25px;
+}
+
+.metodos button{
+    flex:1;
+    padding:15px;
+    border:none;
+    border-radius:15px;
+    background:#e8d3ad;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.metodos button:hover{
+    transform:translateY(-2px);
+}
+
+.metodos .activo{
+    background:#5b2d0f;
+    color:white;
+}
+
+/* TOP BAR */
+.top-bar{
+    display:flex;
+    justify-content:flex-start;
+    margin-bottom:15px;
+}
+
+/* BOTÓN LOGIN */
+.btn-login{
+    border:none;
+    background:#d8b787;
+    color:#4b250f;
+    padding:10px 16px;
+    border-radius:14px;
+    font-weight:bold;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* HOVER */
+.btn-login:hover{
+    background:#5b2d0f;
+    color:white;
     transform:translateY(-2px);
 }

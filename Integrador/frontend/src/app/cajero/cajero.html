@@ -1,17 +1,28 @@
 <div class="contenedor">
     <div class="pedido">
-        <h1>CAPITÁN BURGER </h1>
+        <div class="top-bar">
+            <button
+                class="btn-login"
+                (click)="volverLogin()">
+                ⬅ Volver al Login
+            </button>
+        </div>
+        <h1>CAPITÁN BURGER</h1>
         <div class="lista-pedido">
-            <div *ngFor="let item of carrito; let i = index" class="item">
+            <div
+                *ngFor="let item of carrito; let i = index"
+                class="item">
                 <div>
                     <strong>{{ item.nombre }}</strong>
                     <p>{{ item.tamano }}</p>
-                    <small *ngIf="item.extras.length">
-                        Extras: {{ item.extras.join(', ') }}
+                    <small *ngIf="item.extras?.length">
+                        Extras:
+                        {{ item.extras.join(', ') }}
                     </small>
                     <br>
                     <small *ngIf="item.observacion">
-                        Obs: {{ item.observacion }}
+                        Obs:
+                        {{ item.observacion }}
                     </small>
                 </div>
                 <div class="derecha-item">
@@ -28,7 +39,7 @@
             <h2>Total: S/ {{ total }}</h2>
             <button
                 class="confirmar"
-                (click)="confirmarPedido()">
+                (click)="abrirPago()">
                 Confirmar Pedido
             </button>
         </div>
@@ -42,7 +53,6 @@
                 {{ c.nombre }}
             </button>
         </div>
-
         <div class="productos">
             <button
                 *ngFor="let p of productosFiltrados"
@@ -75,24 +85,26 @@
                 </button>
             </div>
         </div>
-        <div class="extras-box" *ngIf="!esBebidaOComplemento()">
-            <h3>Ingredientes Extra</h3>
-            <div class="extras">
-                <button
-                    *ngFor="let extra of ingredientesExtra"
-                    (click)="toggleExtra(extra)"
-                    [class.activo]="extrasSeleccionados.includes(extra)">
-                    {{ extra }}
-                </button>
+        <ng-container *ngIf="!esBebidaOComplemento()">
+            <div class="extras-box">
+                <h3>Ingredientes Extra</h3>
+                <div class="extras">
+                    <button
+                        *ngFor="let extra of ingredientesExtra"
+                        (click)="toggleExtra(extra)"
+                        [class.activo]="extrasSeleccionados.includes(extra)">
+                        {{ extra }}
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="extras-box" *ngIf="!esBebidaOComplemento()">
-            <h3>Observaciones</h3>
-            <textarea
-                [(ngModel)]="observacion"
-                placeholder="Ej: sin cebolla, extra salsa...">
-            </textarea>
-        </div>
+            <div class="extras-box">
+                <h3>Observaciones</h3>
+                <textarea
+                    [(ngModel)]="observacion"
+                    placeholder="Ej: sin cebolla, extra salsa...">
+                </textarea>
+            </div>
+        </ng-container>
         <div class="acciones-modal">
             <button
                 class="cancelar"
@@ -103,6 +115,50 @@
                 class="agregar-btn"
                 (click)="confirmarProducto()">
                 Agregar al Pedido
+            </button>
+        </div>
+    </div>
+</div>
+
+<div
+    class="modal-overlay"
+    *ngIf="mostrarPago">
+    <div class="modal-box modal-pago">
+        <h2>Confirmar Pago</h2>
+        <p class="precio-modal">
+            Total a pagar: S/ {{ total }}
+        </p>
+        <div class="extras-box">
+            <h3>Método de Pago</h3>
+            <div class="extras">
+                <button
+                    [class.activo]="metodoPago === 'Efectivo'"
+                    (click)="metodoPago = 'Efectivo'">
+                    Efectivo
+                </button>
+
+                <button
+                    [class.activo]="metodoPago === 'Tarjeta'"
+                    (click)="metodoPago = 'Tarjeta'">
+                    Tarjeta
+                </button>
+                <button
+                    [class.activo]="metodoPago === 'Yape'"
+                    (click)="metodoPago = 'Yape'">
+                    Yape
+                </button>
+            </div>
+        </div>
+        <div class="acciones-modal">
+            <button
+                class="cancelar"
+                (click)="mostrarPago = false">
+                Cancelar
+            </button>
+            <button
+                class="agregar-btn"
+                (click)="procesarPago()">
+                Confirmar Pago
             </button>
         </div>
     </div>
