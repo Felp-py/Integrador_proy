@@ -34,7 +34,7 @@
             *ngFor="let pedido of historialPedidos">
             <div class="pedido-header">
                 <h3>
-                    Ticket #{{ pedido.numero }}
+                    Ticket #{{ pedido.id.toString().slice(-4) }}
                 </h3>
                 <span class="estado">
                     {{ pedido.estado }}

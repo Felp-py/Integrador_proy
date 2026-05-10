@@ -422,8 +422,8 @@ textarea:focus{
 /* BOTÓN LOGIN */
 .btn-login{
     border:none;
-    background:#d8b787;
-    color:#4b250f;
+    background: #4b250f;
+    color:#fff;
     padding:10px 16px;
     border-radius:14px;
     font-weight:bold;
