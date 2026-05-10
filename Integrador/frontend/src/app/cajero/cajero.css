@@ -158,9 +158,11 @@ body{
 /* ========================= */
 
 .panel{
-    width:70%;
-    padding:25px;
+    flex:1;
+    padding:25px 35px;
     overflow-y:auto;
+    display:flex;
+    flex-direction:column;
 }
 
 /* ========================= */
@@ -195,13 +197,14 @@ body{
 
 .productos{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-    margin-top:25px;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:25px;
+    margin-top:30px;
+    align-content:start;
 }
 
 .productos button{
-    height:140px;
+    min-height:160px;
     border:4px solid;
     border-radius:28px;
     background:white;

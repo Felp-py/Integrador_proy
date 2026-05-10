@@ -79,6 +79,21 @@ export class Cajero {
     );
   }
 
+  esBebidaOComplemento(): boolean {
+    return (
+      this.productoSeleccionado?.categoria === 'Bebidas' ||
+      this.productoSeleccionado?.categoria === 'Complementos'
+    );
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.productoSeleccionado = null;
+    this.extrasSeleccionados = [];
+    this.observacion = '';
+    this.tamanoSeleccionado = 'Personal';
+  }
+
   agregar(producto: Item) {
     this.productoSeleccionado = producto;
     this.mostrarModal = true;
