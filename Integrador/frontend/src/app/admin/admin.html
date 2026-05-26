@@ -10,9 +10,7 @@
             <h3>Total Ventas</h3>
             <p>S/ {{ totalVentas }}</p>
         </div>
-        <button
-            class="logout-btn"
-            (click)="logout()">
+        <button class="logout-btn" (click)="logout()">
             Cerrar Sesión
         </button>
     </div>
@@ -24,14 +22,10 @@
             Pedidos recibidos:
             {{ historialPedidos.length }}
         </h3>
-        <div
-            class="sin-pedidos"
-            *ngIf="historialPedidos.length === 0">
-            No hay pedidos todavía 
+        <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">
+            No hay pedidos todavía
         </div>
-        <div
-            class="pedido-card"
-            *ngFor="let pedido of historialPedidos">
+        <div class="pedido-card" *ngFor="let pedido of historialPedidos">
             <div class="pedido-header">
                 <h3>
                     Ticket #{{ pedido.id.toString().slice(-4) }}
@@ -39,10 +33,12 @@
                 <span class="estado">
                     {{ pedido.estado }}
                 </span>
+                <!-- añadido -->
+                <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">
+                    Anular
+                </button>
             </div>
-            <div
-                class="item"
-                *ngFor="let item of pedido.items">
+            <div class="item" *ngFor="let item of pedido.items">
                 <strong>
                     {{ item.nombre }}
                 </strong>

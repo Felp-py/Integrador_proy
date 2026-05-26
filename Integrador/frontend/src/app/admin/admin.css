@@ -164,3 +164,18 @@ body{
     font-weight:bold;
     color:#4b250f;
 }
+
+.btn-cancelar{
+    background:#c0392b;
+    color:white;
+    border:none;
+    border-radius:6px;
+    padding:4px 12px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.btn-cancelar:hover{
+    background:#e74c3c;
+}
+

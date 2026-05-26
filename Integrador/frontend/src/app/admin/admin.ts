@@ -49,6 +49,19 @@ export class Admin {
       0
     );
   }
+  
+  cancelarPedido(id: number) {
+  const confirmar = confirm('¿Eliminar este pedido permanentemente?');
+  if (!confirmar) return;
+
+  fetch(`http://localhost:3000/pedidos/${id}`, { method: 'DELETE' })
+    .then(() => {
+      this.historialPedidos = this.historialPedidos.filter(p => p.id !== id);
+      this.cdr.detectChanges();
+    })
+    .catch(err => console.error('Error al cancelar pedido:', err));
+}
+
   logout() {
     this.auth.logout();
   }
