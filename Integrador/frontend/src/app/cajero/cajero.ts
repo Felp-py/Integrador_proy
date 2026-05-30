@@ -239,6 +239,7 @@ export class Cajero implements OnInit {
     this.ultimoPedidoId = Date.now();
     this.carrito = [];
     this.mostrarPago = false;
+    this.cargarStock(); // Actualizamos el stock después de realizar el pedido
     alert('✅ Pago realizado correctamente y enviado a cocina');
   }
 
