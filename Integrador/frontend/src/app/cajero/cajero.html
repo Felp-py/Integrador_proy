@@ -47,9 +47,16 @@
             </button>
         </div>
         <div class="productos">
-            <button *ngFor="let p of productosFiltrados" [style.border-color]="p.color" (click)="agregar(p)">
+            <button *ngFor="let p of productosFiltrados" [style.border-color]="p.color"
+                [disabled]="stockMap[p.producto_id] === 0" (click)="agregar(p)">
                 <h3>{{ p.nombre }}</h3>
                 <span>S/ {{ p.precio }}</span>
+                <small [style.color]="
+                 stockMap[p.producto_id] === undefined ? 'gray' :
+                 stockMap[p.producto_id] === 0 ? 'red' :
+                 stockMap[p.producto_id] <= 5 ? 'orange' : 'green'">
+                    Stock: {{ stockMap[p.producto_id]  }}
+                </small>
             </button>
         </div>
     </div>

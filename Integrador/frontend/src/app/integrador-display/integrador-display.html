@@ -10,35 +10,40 @@
 <div class="grid">
   <div class="columna" *ngFor="let col of columnas">
     <div class="pedido" *ngFor="let p of col" [ngClass]="p.estado">
-      
+
       <div class="pedido-header">
         <span class="tecla-shortcut">{{ p.originalIndex }}</span>
-        <h2>Ticket #{{ p.id.toString().slice(-4) }}</h2> </div>
+        <h2>Ticket #{{ p.id.toString().slice(-4) }}</h2>
+      </div>
       <div class="pedido-body">
         <div *ngFor="let item of p.items" class="ticket-item">
           <div class="item-main">
             <strong>• {{ item.nombre }}</strong>
             <span class="badge-tamano">{{ item.tamano }}</span>
           </div>
-          
+
           <div *ngIf="item.extras && item.extras.length" class="item-extras">
             <small>{{ item.extras.join(', ') }}</small>
           </div>
-          
+
           <div *ngIf="item.observacion" class="item-obs">
             <small>" {{ item.observacion }} "</small>
           </div>
         </div>
-        
+
         <p class="estado-label">Estado: <span>{{ p.estado | uppercase }}</span></p>
       </div>
       <div class="pedido-footer">
         <button (click)="cambiarEstado(p.originalIndex)">
           {{
-            p.estado === 'pendiente' ? 'Iniciar' :
-            p.estado === 'preparacion' ? 'Listo' :
-            'Entregar'
+          p.estado === 'pendiente' ? 'Iniciar' :
+          p.estado === 'preparacion' ? 'Listo' :
+          'Entregar'
           }}
+        </button>
+        <!-- 👇 agregar este botón -->
+        <button class="btn-cancelar-cocina" (click)="cancelarPedido(p)">
+          ✕ Cancelar
         </button>
       </div>
     </div>

@@ -18,6 +18,21 @@
         <div class="header-panel">
             <h2>Historial de Pedidos</h2>
         </div>
+        <div class="seccion-mes">
+            <h2>Ventas por Mes</h2>
+            <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
+                <div class="mes-header">
+                    <h3>📅 {{ mes.mes_nombre }}</h3>
+                    <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
+                </div>
+                <div class="mes-detalle">
+                    <span>🧾 Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">💵 Efectivo: <strong>{{ mes.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
+                    <span class="pago-yape">📱 Yape: <strong>{{ mes.yape }}</strong></span>
+                </div>
+            </div>
+        </div>
         <h3 style="margin-bottom:20px;color:#5b2d0f">
             Pedidos recibidos:
             {{ historialPedidos.length }}
@@ -30,10 +45,14 @@
                 <h3>
                     Ticket #{{ pedido.id.toString().slice(-4) }}
                 </h3>
-                <span class="estado">
-                    {{ pedido.estado }}
+                <span class="badge-pago" [ngClass]="{
+                  'pago-efectivo': pedido.pago === 'Efectivo',
+                  'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                  'pago-yape':     pedido.pago === 'Yape'
+                }">
+                    💳 {{ pedido.pago }}
                 </span>
-                <!-- añadido -->
+                <span class="estado">{{ pedido.estado }}</span>
                 <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">
                     Anular
                 </button>

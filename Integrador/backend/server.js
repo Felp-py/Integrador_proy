@@ -182,13 +182,60 @@ io.on('connection', (socket) => {
 app.get('/historial', async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT id, numero, estado, pago, CAST(total AS FLOAT) as total, creado_en FROM pedidos ORDER BY creado_en DESC LIMIT 100'
+      `SELECT p.id, p.numero, p.estado, p.pago, 
+              CAST(p.total AS FLOAT) as total, 
+              p.creado_en,
+              JSON_ARRAYAGG(
+                JSON_OBJECT(
+                  'nombre', pi.nombre,
+                  'tamano', pi.tamano,
+                  'precio', CAST(pi.precio AS FLOAT),
+                  'extras', pi.extras,
+                  'observacion', pi.observacion
+                )
+              ) as items
+       FROM pedidos p
+       LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
+       GROUP BY p.id
+       ORDER BY p.creado_en DESC
+       LIMIT 100`
+    );
+
+    // Parsear items JSON
+    const pedidos = rows.map((p) => ({
+      ...p,
+      items: typeof p.items === 'string' ? JSON.parse(p.items) : (p.items || [])
+    }));
+
+    res.json(pedidos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Historial de ventas por mes
+app.get('/ventas-por-mes', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+        DATE_FORMAT(creado_en, '%Y-%m') as mes,
+        DATE_FORMAT(creado_en, '%M %Y') as mes_nombre,
+        COUNT(*) as total_pedidos,
+        SUM(total) as total_ventas,
+        SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
+        SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
+        SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
+       FROM pedidos
+       WHERE estado != 'cancelado'
+       GROUP BY DATE_FORMAT(creado_en, '%Y-%m')
+       ORDER BY mes DESC`
     );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // Lista de productos del menú
 app.get('/productos', async (req, res) => {
@@ -204,10 +251,31 @@ app.get('/productos', async (req, res) => {
 
 //parte añadadido eliminacion permanedenente de pedidos
 app.delete('/pedidos/:id', async (req, res) => {
-  await db.query('DELETE FROM pedidos WHERE id = ?', [id]); 
-  pedidos = pedidos.filter(p => p.id != id);                
-  io.emit('pedidosActualizados', pedidos);                  
-  res.json({ ok: true });
+  const { id } = req.params; // nuevo
+  try {
+    await db.query('DELETE FROM pedidos WHERE id = ?', [id]);
+    pedidos = pedidos.filter(p => p.id != id);
+    io.emit('pedidosActualizados', pedidos);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Stock de productos
+app.get('/stock', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT p.id, p.nombre, i.stock_actual, i.stock_minimo
+       FROM productos p
+       JOIN inventario i ON i.producto_id = p.id
+       WHERE p.activo = TRUE
+       ORDER BY p.id`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // =============================================

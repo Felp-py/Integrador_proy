@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SocketService } from './socket'; // <-- Importamos el socket aquí
 
 export interface PedidoItem {
-  producto_id?: number;
+  producto_id: number;
   nombre: string; // cambio
   precio: number;
   categoria: string;

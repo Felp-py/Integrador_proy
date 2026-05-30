@@ -183,3 +183,18 @@ body{
 .pedido-footer button:hover{
   background:#7a3c15;
 }
+
+.btn-cancelar-cocina {
+  background: #c0392b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.btn-cancelar-cocina:hover {
+  background: #e74c3c;
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component,  OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,7 @@ import { Pedido, PedidoItem } from '../pedido';
   templateUrl: './cajero.html',
   styleUrls: ['./cajero.css']
 })
-export class Cajero {
+export class Cajero implements OnInit {
   constructor(
     private pedidoService: PedidoService, // Inyectas PedidoService en vez de SocketService directamente
     private router: Router
@@ -35,6 +35,24 @@ export class Cajero {
   tamanos = ['Personal', 'Mediana', 'Grande'];
 
   tamanoSeleccionado = 'Personal';
+
+  stockMap: { [producto_id: number]: number } = {};
+
+  ngOnInit() {
+    this.cargarStock();
+  }
+
+  cargarStock() {
+    fetch('http://localhost:3000/stock')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        data.forEach(item => {
+          this.stockMap[item.id] = item.stock_actual;
+        });
+      });
+  }
+
+
 
   ingredientesExtra = [
     'Queso extra',
