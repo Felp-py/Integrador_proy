@@ -179,88 +179,89 @@ body{
     background:#e74c3c;
 }
 
-.badge-pago {
-  padding: 6px 14px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 13px;
-}
-.pago-efectivo { background: #d5f5e3; color: #1e8449; }
-.pago-tarjeta  { background: #d6eaf8; color: #1a5276; }
-.pago-yape     { background: #e8daef; color: #6c3483; }
-
-.seccion-mes {
-  margin-bottom: 35px;
+.badge-pago{
+    padding:6px 14px;
+    border-radius:12px;
+    font-weight:bold;
+    font-size:13px;
 }
 
-.seccion-mes h2 {
-  color: #4b250f;
-  font-size: 28px;
-  margin-bottom: 15px;
+.pago-efectivo{ background:#d5f5e3; color:#1e8449; }
+.pago-tarjeta { background:#d6eaf8; color:#1a5276; }
+.pago-yape    { background:#e8daef; color:#6c3483; }
+
+.seccion-mes{
+    margin-bottom:35px;
 }
 
-.tabla-mes {
-  background: white;
-  border-radius: 18px;
-  padding: 20px;
-  margin-bottom: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-  border-left: 8px solid #d89b45;
+.seccion-mes h2{
+    color:#4b250f;
+    font-size:28px;
+    margin-bottom:15px;
 }
 
-.mes-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+.tabla-mes{
+    background:white;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+    border-left:8px solid #d89b45;
 }
 
-.mes-header h3 {
-  color: #4b250f;
-  font-size: 20px;
+.mes-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
 }
 
-.total-mes {
-  font-size: 24px;
-  font-weight: bold;
-  color: #5b2d0f;
+.mes-header h3{
+    color:#4b250f;
+    font-size:20px;
 }
 
-.mes-detalle {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  font-size: 14px;
-  color: #444;
+.total-mes{
+    font-size:24px;
+    font-weight:bold;
+    color:#5b2d0f;
 }
 
-.mes-detalle .pago-efectivo { color: #1e8449; font-weight: bold; }
-.mes-detalle .pago-tarjeta  { color: #1a5276; font-weight: bold; }
-.mes-detalle .pago-yape     { color: #6c3483; font-weight: bold; }
-
-.tabs-ventas {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+.mes-detalle{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    font-size:14px;
+    color:#444;
 }
 
-.tabs-ventas button {
-  padding: 10px 24px;
-  border: none;
-  border-radius: 12px;
-  background: #f5d5a7;
-  color: #4b250f;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
+.mes-detalle .pago-efectivo{ color:#1e8449; font-weight:bold; }
+.mes-detalle .pago-tarjeta { color:#1a5276; font-weight:bold; }
+.mes-detalle .pago-yape    { color:#6c3483; font-weight:bold; }
+
+.tabs-ventas{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
 }
 
-.tabs-ventas button:hover {
-  background: #d89b45;
-  color: white;
+.tabs-ventas button{
+    padding:10px 24px;
+    border:none;
+    border-radius:12px;
+    background:#f5d5a7;
+    color:#4b250f;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
 }
 
-.tab-activo {
-  background: #5b2d0f !important;
-  color: white !important;
+.tabs-ventas button:hover{
+    background:#d89b45;
+    color:white;
+}
+
+.tab-activo{
+    background:#5b2d0f !important;
+    color:white !important;
 }

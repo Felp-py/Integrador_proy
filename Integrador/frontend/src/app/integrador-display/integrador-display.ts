@@ -41,6 +41,7 @@ export class IntegradorDisplay implements OnInit {
     setInterval(() => {
       this.actualizarReloj();
     }, 1000);
+
     this.socket.escucharPedidos().subscribe((data: any) => {
       console.log('Pedidos actualizados:', data);
       this.pedidos = data;
@@ -76,25 +77,22 @@ export class IntegradorDisplay implements OnInit {
     );
     const pedidoVisible = pedidosVisibles[index];
     if (!pedidoVisible) return;
+
     const pedido = this.pedidos.find(
       p => p.id === pedidoVisible.id
     );
-
     if (!pedido) return;
 
     if (pedido.estado === 'pendiente') {
       pedido.estado = 'preparacion';
-    }
-    else if (pedido.estado === 'preparacion') {
+    } else if (pedido.estado === 'preparacion') {
       pedido.estado = 'listo';
-    }
-    else if (pedido.estado === 'listo') {
+    } else if (pedido.estado === 'listo') {
       pedido.estado = 'entregado';
     }
+
     this.socket.actualizarPedidos(this.pedidos);
     this.actualizarColumnas();
     this.cdr.detectChanges();
   }
-
-
 }

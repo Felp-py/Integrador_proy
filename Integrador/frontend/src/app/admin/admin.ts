@@ -1,7 +1,9 @@
+
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
 import { SocketService } from '../socket';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin',
@@ -10,16 +12,15 @@ import { SocketService } from '../socket';
   templateUrl: './admin.html',
   styleUrls: ['./admin.css']
 })
-
 export class Admin {
   constructor(
     public auth: AuthService,
     private socket: SocketService,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   historialPedidos: any[] = [];
-  ventasPorMes: any[] = []; // cambio
+  ventasPorMes: any[] = [];
   ventasPorDia: any[] = [];
   ventasPorSemana: any[] = [];
   vistaSeleccionada: 'dia' | 'semana' | 'mes' = 'mes';
@@ -39,7 +40,6 @@ export class Admin {
     });
   }
 
-  // nuevo
   cargarHistorial() {
     fetch('http://localhost:3000/historial')
       .then(res => res.json())
@@ -59,22 +59,22 @@ export class Admin {
   }
 
   cargarVentasPorDia() {
-  fetch('http://localhost:3000/ventas-por-dia')
-    .then(res => res.json())
-    .then((data: any[]) => {
-      this.ventasPorDia = data;
-      this.cdr.detectChanges();
-    });
-}
+    fetch('http://localhost:3000/ventas-por-dia')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        this.ventasPorDia = data;
+        this.cdr.detectChanges();
+      });
+  }
 
-cargarVentasPorSemana() {
-  fetch('http://localhost:3000/ventas-por-semana')
-    .then(res => res.json())
-    .then((data: any[]) => {
-      this.ventasPorSemana = data;
-      this.cdr.detectChanges();
-    });
-}
+  cargarVentasPorSemana() {
+    fetch('http://localhost:3000/ventas-por-semana')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        this.ventasPorSemana = data;
+        this.cdr.detectChanges();
+      });
+  }
 
   get totalVentas() {
     return this.historialPedidos.reduce(
@@ -102,6 +102,8 @@ cargarVentasPorSemana() {
       .then(() => {
         this.cargarHistorial();
         this.cargarVentasPorMes();
+        this.cargarVentasPorDia();
+        this.cargarVentasPorSemana();
         this.cdr.detectChanges();
       })
       .catch(err => console.error('Error al cancelar pedido:', err));

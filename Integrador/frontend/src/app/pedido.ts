@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { SocketService } from './socket'; // <-- Importamos el socket aquí
-
+import { SocketService } from './socket';
 export interface PedidoItem {
   producto_id: number;
-  nombre: string; // cambio
+  nombre: string;
   precio: number;
   categoria: string;
   color: string;
-  tamano?: string;      // Opcional de nuevo
-  extras?: string[];    // Opcional de nuevo
-  observacion?: string; // Opcional de nuevo
+  tamano?: string;
+  extras?: string[];
+  observacion?: string;
 }
 
 export interface Pedido {
@@ -32,7 +31,6 @@ export class PedidoService {
   contador = 0;
 
   constructor(private socket: SocketService) {
-    //  actualizar 
     this.socket.escucharPedidos().subscribe((pedidosDesdeServidor) => {
       this.pedidos = pedidosDesdeServidor;
       this.pedidosSubject.next(this.pedidos);
@@ -49,11 +47,9 @@ export class PedidoService {
       pago,
       total
     };
-
     this.socket.enviarPedido(nuevo);
   }
 
-  //el cajero/cocina actualiza 
   actualizarPedidos(pedidos: Pedido[]) {
     this.socket.actualizarPedidos(pedidos);
   }

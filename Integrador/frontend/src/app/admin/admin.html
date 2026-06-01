@@ -18,17 +18,17 @@
         <div class="header-panel">
             <h2>Historial de Pedidos</h2>
         </div>
+
+        <!-- VENTAS POR PERÍODO -->
         <div class="seccion-mes">
             <h2>Ventas</h2>
-
-            <!-- Tabs -->
             <div class="tabs-ventas">
-                <button [class.tab-activo]="vistaSeleccionada === 'dia'" (click)="vistaSeleccionada = 'dia'">Por
-                    Día</button>
-                <button [class.tab-activo]="vistaSeleccionada === 'semana'" (click)="vistaSeleccionada = 'semana'">Por
-                    Semana</button>
-                <button [class.tab-activo]="vistaSeleccionada === 'mes'" (click)="vistaSeleccionada = 'mes'">Por
-                    Mes</button>
+                <button [class.tab-activo]="vistaSeleccionada === 'dia'"
+                    (click)="vistaSeleccionada = 'dia'">Por Día</button>
+                <button [class.tab-activo]="vistaSeleccionada === 'semana'"
+                    (click)="vistaSeleccionada = 'semana'">Por Semana</button>
+                <button [class.tab-activo]="vistaSeleccionada === 'mes'"
+                    (click)="vistaSeleccionada = 'mes'">Por Mes</button>
             </div>
 
             <!-- Por Día -->
@@ -79,22 +79,21 @@
                 </div>
             </ng-container>
         </div>
+
+        <!-- HISTORIAL DE PEDIDOS -->
         <h3 style="margin-bottom:20px;color:#5b2d0f">
-            Pedidos recibidos:
-            {{ historialPedidos.length }}
+            Pedidos recibidos: {{ historialPedidos.length }}
         </h3>
         <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">
             No hay pedidos todavía
         </div>
         <div class="pedido-card" *ngFor="let pedido of historialPedidos">
             <div class="pedido-header">
-                <h3>
-                    Ticket #{{ pedido.id.toString().slice(-4) }}
-                </h3>
+                <h3>Ticket #{{ pedido.id.toString().slice(-4) }}</h3>
                 <span class="badge-pago" [ngClass]="{
-                  'pago-efectivo': pedido.pago === 'Efectivo',
-                  'pago-tarjeta':  pedido.pago === 'Tarjeta',
-                  'pago-yape':     pedido.pago === 'Yape'
+                    'pago-efectivo': pedido.pago === 'Efectivo',
+                    'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                    'pago-yape':     pedido.pago === 'Yape'
                 }">
                     💳 {{ pedido.pago }}
                 </span>
@@ -104,29 +103,19 @@
                 </button>
             </div>
             <div class="item" *ngFor="let item of pedido.items">
-                <strong>
-                    {{ item.nombre }}
-                </strong>
-                <p>
-                    Tamaño:
-                    {{ item.tamano }}
-                </p>
+                <strong>{{ item.nombre }}</strong>
+                <p>Tamaño: {{ item.tamano }}</p>
                 <small *ngIf="item.extras?.length">
-                    Extras:
-                    {{ item.extras.join(', ') }}
+                    Extras: {{ item.extras.join(', ') }}
                 </small>
                 <br>
                 <small *ngIf="item.observacion">
-                    Obs:
-                    {{ item.observacion }}
+                    Obs: {{ item.observacion }}
                 </small>
-                <div class="precio">
-                    S/ {{ item.precio }}
-                </div>
+                <div class="precio">S/ {{ item.precio }}</div>
             </div>
             <div class="total">
-                Total:
-                S/ {{ getTotalPedido(pedido) }}
+                Total: S/ {{ getTotalPedido(pedido) }}
             </div>
         </div>
     </div>

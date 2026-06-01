@@ -39,40 +39,40 @@
             </button>
         </div>
     </div>
-    <div class="panel">
+  <div class="panel">
         <div class="categorias">
-            <button *ngFor="let c of categorias" [style.background]="c.color"
+            <button *ngFor="let c of categorias"
+                [style.background]="c.color"
                 (click)="categoriaSeleccionada = c.nombre">
                 {{ c.nombre }}
             </button>
         </div>
         <div class="productos">
-            <button *ngFor="let p of productosFiltrados" [style.border-color]="p.color"
-                [disabled]="stockMap[p.producto_id] === 0" (click)="agregar(p)">
+            <button *ngFor="let p of productosFiltrados"
+                [style.border-color]="p.color"
+                [disabled]="stockMap[p.producto_id] === 0"
+                (click)="agregar(p)">
                 <h3>{{ p.nombre }}</h3>
                 <span>S/ {{ p.precio }}</span>
                 <small [style.color]="
-                 stockMap[p.producto_id] === undefined ? 'gray' :
-                 stockMap[p.producto_id] === 0 ? 'red' :
-                 stockMap[p.producto_id] <= 5 ? 'orange' : 'green'">
-                    Stock: {{ stockMap[p.producto_id]  }}
+                    stockMap[p.producto_id] === undefined ? 'gray' :
+                    stockMap[p.producto_id] === 0 ? 'red' :
+                    stockMap[p.producto_id] <= 5 ? 'orange' : 'green'">
+                    Stock: {{ stockMap[p.producto_id] }}
                 </small>
             </button>
         </div>
     </div>
 </div>
+
 <div class="modal-overlay" *ngIf="mostrarModal">
     <div class="modal-box">
-        <h2>
-            {{ productoSeleccionado?.nombre }}
-        </h2>
-        <p class="precio-modal">
-            S/ {{ precioActual }}
-        </p>
+        <h2>{{ productoSeleccionado?.nombre }}</h2>
+        <p class="precio-modal">S/ {{ precioActual }}</p>
         <div class="extras-box">
             <h3>Tamaño</h3>
             <div class="extras">
-                <button *ngFor="let t of tamanos" 
+                <button *ngFor="let t of tamanos"
                     [class.activo]="tamanoSeleccionado === t"
                     (click)="seleccionarTamano(t)">
                     {{ t }}
@@ -83,7 +83,8 @@
             <div class="extras-box">
                 <h3>Ingredientes Extra</h3>
                 <div class="extras">
-                    <button *ngFor="let extra of ingredientesExtra" (click)="toggleExtra(extra)"
+                    <button *ngFor="let extra of ingredientesExtra"
+                        (click)="toggleExtra(extra)"
                         [class.activo]="extrasSeleccionados.includes(extra)">
                         {{ extra }}
                     </button>
@@ -91,20 +92,20 @@
             </div>
             <div class="extras-box">
                 <h3>Observaciones</h3>
-                <textarea [(ngModel)]="observacion" placeholder="Ej: sin cebolla, extra salsa...">
+                <textarea [(ngModel)]="observacion"
+                    placeholder="Ej: sin cebolla, extra salsa...">
                 </textarea>
             </div>
         </ng-container>
         <div class="acciones-modal">
-            <button class="cancelar" (click)="cerrarModal()">
-                Cancelar
-            </button>
+            <button class="cancelar" (click)="cerrarModal()">Cancelar</button>
             <button class="agregar-btn" (click)="confirmarProducto()">
                 Agregar al Pedido
             </button>
         </div>
     </div>
 </div>
+
 
 <div class="modal-overlay" *ngIf="mostrarPago">
     <div class="modal-box modal-pago">

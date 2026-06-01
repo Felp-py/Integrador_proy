@@ -14,9 +14,7 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-// =============================================
-// Conexión a MySQL
-// =============================================
+
 const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -30,30 +28,24 @@ db.getConnection()
   .then(() => console.log('🗄️  MySQL conectado'))
   .catch(err => console.error('❌ Error MySQL:', err.message));
 
-// =============================================
-// Estado en memoria
-// =============================================
+
 let contador = 0;
 let pedidos = [];
 
-// Cargar pedidos activos y RECONSTRUIR sus ítems desde MySQL al iniciar
 async function cargarPedidosActivos() {
   try {
-    // 1. Obtener los pedidos activos
     const [rowsPedidos] = await db.query(
       "SELECT id, numero, estado, pago, CAST(total AS FLOAT) as total, creado_en FROM pedidos WHERE estado != 'entregado' ORDER BY creado_en ASC"
     );
 
     const pedidosReconstruidos = [];
 
-    // 2. Por cada pedido, buscar sus platos/ítems correspondientes
     for (const pedido of rowsPedidos) {
       const [rowsItems] = await db.query(
         "SELECT nombre, CAST(precio AS FLOAT) as precio, tamano, extras, observacion FROM pedido_items WHERE pedido_id = ?",
         [pedido.id]
       );
 
-      // Parsear el campo JSON de extras de forma segura
       const itemsMap = rowsItems.map(item => ({
         ...item,
         extras: typeof item.extras === 'string' ? JSON.parse(item.extras) : (item.extras || [])
@@ -74,7 +66,7 @@ async function cargarPedidosActivos() {
     if (pedidos.length > 0) {
       contador = Math.max(...pedidos.map(p => p.numero)) + 1;
     } else {
-      contador = 1; // Si no hay pedidos, empezar en 1
+      contador = 1;
     }
     console.log(`📋 ${pedidos.length} pedidos activos con sus ítems cargados desde MySQL`);
   } catch (err) {
@@ -82,16 +74,12 @@ async function cargarPedidosActivos() {
   }
 }
 
-// =============================================
-// Sockets
-// =============================================
+
 io.on('connection', (socket) => {
   console.log('🟢 Cliente conectado');
 
-  // Enviar pedidos actuales al nuevo cliente
   socket.emit('pedidosActualizados', pedidos);
 
-  // Nuevo pedido desde la caja
   socket.on('nuevoPedido', async (pedido) => {
     pedido.numero = contador++;
     pedido.estado = 'pendiente';
@@ -99,16 +87,13 @@ io.on('connection', (socket) => {
 
     const connection = await db.getConnection();
     try {
-      // Usamos una Transacción para asegurar que se guarde la cabecera Y los ítems juntos
       await connection.beginTransaction();
 
-      // 1. Guardar la cabecera del pedido (Corregido las columnas de tu SQL)
       await connection.query(
         'INSERT INTO pedidos (id, numero, estado, pago, total) VALUES (?, ?, ?, ?, ?)',
         [pedido.id, pedido.numero, pedido.estado, pedido.pago, pedido.total]
       );
 
-      // 2. Guardar los ítems asociados al pedido uno por uno
       if (pedido.items && pedido.items.length > 0) {
         for (const item of pedido.items) {
           await connection.query(
@@ -118,7 +103,7 @@ io.on('connection', (socket) => {
               item.producto_id || null,
               item.nombre,
               item.tamano || 'Personal',
-              JSON.stringify(item.extras || []), // Guardar array de JS como string de JSON en la BD
+              JSON.stringify(item.extras || []),
               item.observacion || '',
               item.precio
             ]
@@ -138,13 +123,11 @@ io.on('connection', (socket) => {
     io.emit('pedidosActualizados', pedidos);
   });
 
-  // Actualizar estado de pedidos desde cocina
   socket.on('actualizarPedidos', async (data) => {
     pedidos = data;
     io.emit('pedidosActualizados', pedidos);
 
     try {
-      // Sincronizar estados activos en MySQL
       for (const p of pedidos) {
         await db.query(
           'UPDATE pedidos SET estado = ? WHERE id = ?',
@@ -152,7 +135,6 @@ io.on('connection', (socket) => {
         );
       }
 
-      // Marcar como entregados en la BD los que el flujo sacó de memoria
       if (pedidos.length > 0) {
         const ids = pedidos.map(p => p.id);
         await db.query(
@@ -161,7 +143,6 @@ io.on('connection', (socket) => {
           [ids]
         );
       } else {
-        // Si la memoria quedó vacía, pasamos todo lo que quedaba pendiente a entregado
         await db.query("UPDATE pedidos SET estado = 'entregado' WHERE estado != 'entregado'");
       }
     } catch (err) {
@@ -174,9 +155,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// =============================================
-// REST API — historial y productos
-// =============================================
 
 // Historial de pedidos
 app.get('/historial', async (req, res) => {
@@ -201,19 +179,18 @@ app.get('/historial', async (req, res) => {
        LIMIT 100`
     );
 
-    // Parsear items JSON
-    const pedidos = rows.map((p) => ({
+    const resultado = rows.map((p) => ({
       ...p,
       items: typeof p.items === 'string' ? JSON.parse(p.items) : (p.items || [])
     }));
 
-    res.json(pedidos);
+    res.json(resultado);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Historial de ventas por mes
+// Ventas por mes
 app.get('/ventas-por-mes', async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -226,7 +203,7 @@ app.get('/ventas-por-mes', async (req, res) => {
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
        FROM pedidos
-       WHERE estado != 'cancelado'
+       WHERE estado = 'entregado'
        GROUP BY DATE_FORMAT(creado_en, '%Y-%m')
        ORDER BY mes DESC`
     );
@@ -236,7 +213,7 @@ app.get('/ventas-por-mes', async (req, res) => {
   }
 });
 
-// Ventas por día 
+// Ventas por día (últimos 30 días)
 app.get('/ventas-por-dia', async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -283,8 +260,7 @@ app.get('/ventas-por-semana', async (req, res) => {
   }
 });
 
-
-// Lista de productos del menú
+// Lista de productos
 app.get('/productos', async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -296,9 +272,9 @@ app.get('/productos', async (req, res) => {
   }
 });
 
-//parte añadadido eliminacion permanedenente de pedidos
+// Eliminar pedido permanentemente
 app.delete('/pedidos/:id', async (req, res) => {
-  const { id } = req.params; // nuevo
+  const { id } = req.params;
   try {
     await db.query('DELETE FROM pedidos WHERE id = ?', [id]);
     pedidos = pedidos.filter(p => p.id != id);
@@ -325,9 +301,6 @@ app.get('/stock', async (req, res) => {
   }
 });
 
-// =============================================
-// Iniciar servidor
-// =============================================
 async function iniciar() {
   await cargarPedidosActivos();
   server.listen(3000, () => {
