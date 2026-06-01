@@ -22,14 +22,14 @@
             <h2>Ventas por Mes</h2>
             <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
                 <div class="mes-header">
-                    <h3>📅 {{ mes.mes_nombre }}</h3>
+                    <h3>{{ mes.mes_nombre }}</h3>
                     <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
                 </div>
                 <div class="mes-detalle">
-                    <span>🧾 Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
-                    <span class="pago-efectivo">💵 Efectivo: <strong>{{ mes.efectivo }}</strong></span>
-                    <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
-                    <span class="pago-yape">📱 Yape: <strong>{{ mes.yape }}</strong></span>
+                    <span>Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ mes.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ mes.yape }}</strong></span>
                 </div>
             </div>
         </div>
@@ -46,11 +46,11 @@
                     Ticket #{{ pedido.id.toString().slice(-4) }}
                 </h3>
                 <span class="badge-pago" [ngClass]="{
-                  'pago-efectivo': pedido.pago === 'Efectivo',
-                  'pago-tarjeta':  pedido.pago === 'Tarjeta',
-                  'pago-yape':     pedido.pago === 'Yape'
+                    'pago-efectivo': pedido.pago === 'Efectivo',
+                    'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                    'pago-yape':     pedido.pago === 'Yape'
                 }">
-                    💳 {{ pedido.pago }}
+                    {{ pedido.pago }}
                 </span>
                 <span class="estado">{{ pedido.estado }}</span>
                 <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">

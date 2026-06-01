@@ -95,20 +95,17 @@ export class IntegradorDisplay implements OnInit {
     this.actualizarColumnas();
     this.cdr.detectChanges();
   }
-  // nuevo
   cancelarPedido(pedido: any) {
     const confirmar = confirm(`¿Cancelar permanentemente el Ticket #${pedido.id.toString().slice(-4)}?`);
     if (!confirmar) return;
 
     fetch(`http://localhost:3000/pedidos/${pedido.id}`, { method: 'DELETE' })
       .then(() => {
-        // Eliminar de memoria local
         this.pedidos = this.pedidos.filter(p => p.id !== pedido.id);
-        // Notificar a todos
         this.socket.actualizarPedidos(this.pedidos);
         this.actualizarColumnas();
         this.cdr.detectChanges();
-        alert('✅ Pedido eliminado permanentemente.');
+        alert('Pedido eliminado permanentemente.');
       })
       .catch(err => console.error('Error al cancelar:', err));
   }

@@ -19,11 +19,11 @@ export class Admin {
   ) {}
 
   historialPedidos: any[] = [];
-  ventasPorMes: any[] = []; // cambio
+  ventasPorMes: any[] = []; 
 
   ngOnInit() {
-    this.cargarHistorial(); // cambio
-    this.cargarVentasPorMes(); //cambio
+    this.cargarHistorial(); 
+    this.cargarVentasPorMes(); 
     this.socket.escucharPedidos().subscribe((pedidos: any[]) => {
       console.log('ADMIN RECIBIÓ:', pedidos);
       this.cdr.detectChanges();

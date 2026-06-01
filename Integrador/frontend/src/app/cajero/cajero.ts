@@ -14,28 +14,20 @@ import { Pedido, PedidoItem } from '../pedido';
 })
 export class Cajero implements OnInit {
   constructor(
-    private pedidoService: PedidoService, // Inyectas PedidoService en vez de SocketService directamente
+    private pedidoService: PedidoService, 
     private router: Router
   ) { }
 
   carrito: PedidoItem[] = [];
   ultimoPedidoId: number | null = null;
   categoriaSeleccionada = 'Hamburguesas';
-
   observacion = '';
-
   productoSeleccionado: PedidoItem | null = null;
-
   mostrarModal = false;
-
   mostrarPago = false;
-
   metodoPago: 'Efectivo' | 'Tarjeta' | 'Yape' = 'Efectivo';
-
   tamanos = ['Personal', 'Mediana', 'Grande'];
-
   tamanoSeleccionado = 'Personal';
-
   stockMap: { [producto_id: number]: number } = {};
 
   ngOnInit() {
@@ -116,120 +108,79 @@ export class Cajero implements OnInit {
   }
 
   esBebidaOComplemento(): boolean {
-
     return (
       this.productoSeleccionado?.categoria === 'Bebidas' ||
       this.productoSeleccionado?.categoria === 'Complementos'
     );
-
   }
 
   agregar(producto: PedidoItem) {
-
     this.productoSeleccionado = producto;
-
     this.mostrarModal = true;
-
   }
 
   cerrarModal() {
-
     this.mostrarModal = false;
-
     this.productoSeleccionado = null;
-
     this.extrasSeleccionados = [];
-
     this.observacion = '';
-
     this.tamanoSeleccionado = 'Personal';
-
   }
 
   confirmarProducto() {
-
     if (!this.productoSeleccionado) return;
-
     let precioFinal =
       this.productoSeleccionado.precio;
-
     if (this.tamanoSeleccionado === 'Mediana') {
       precioFinal += 3;
     }
-
     if (this.tamanoSeleccionado === 'Grande') {
       precioFinal += 6;
     }
-
     precioFinal +=
       this.extrasSeleccionados.length * 2;
-
     this.carrito.push({
-
       ...this.productoSeleccionado,
-
       producto_id: this.productoSeleccionado.producto_id, //cambio
-
       tamano: this.tamanoSeleccionado,
-
       extras: [...this.extrasSeleccionados],
-
       observacion: this.observacion,
-
       precio: precioFinal
-
     });
-
     this.cerrarModal();
-
   }
 
   toggleExtra(extra: string) {
-
     if (
       this.extrasSeleccionados.includes(extra)
     ) {
-
       this.extrasSeleccionados =
         this.extrasSeleccionados.filter(
           e => e !== extra
         );
-
     } else {
-
       this.extrasSeleccionados.push(extra);
-
     }
-
   }
 
   eliminar(index: number) {
-
     this.carrito.splice(index, 1);
-
   }
 
   get total(): number {
-
     return this.carrito.reduce(
       (sum, item) => sum + item.precio,
       0
     );
-
   }
 
   abrirPago() {
-
     if (this.carrito.length === 0) return;
-
     this.mostrarPago = true;
-
   }
 
   procesarPago() {
     if (this.carrito.length === 0) return;
-
-    // El servicio se encarga de armar el ID, el número correlativo y disparar el Socket
     this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
@@ -239,8 +190,8 @@ export class Cajero implements OnInit {
     this.ultimoPedidoId = Date.now();
     this.carrito = [];
     this.mostrarPago = false;
-    this.cargarStock(); // Actualizamos el stock después de realizar el pedido
-    alert('✅ Pago realizado correctamente y enviado a cocina');
+    this.cargarStock(); 
+    alert('Pago realizado correctamente y enviado a cocina');
   }
 
   cancelarUltimoPedido() {
@@ -251,10 +202,9 @@ export class Cajero implements OnInit {
 
     const confirmar = confirm('¿Cancelar y eliminar permanentemente el último pedido?');
     if (!confirmar) return;
-
     fetch(`http://localhost:3000/pedidos/${this.ultimoPedidoId}`, { method: 'DELETE' })
       .then(() => {
-        alert('✅ Pedido cancelado y eliminado permanentemente.');
+        alert('Pedido cancelado y eliminado permanentemente.');
         this.ultimoPedidoId = null;
       })
       .catch(err => console.error('Error al cancelar:', err));
@@ -262,9 +212,6 @@ export class Cajero implements OnInit {
 
 
   volverLogin() {
-
     this.router.navigate(['/login']);
-
   }
-
 }
