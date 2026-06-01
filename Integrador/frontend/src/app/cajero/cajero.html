@@ -67,13 +67,14 @@
             {{ productoSeleccionado?.nombre }}
         </h2>
         <p class="precio-modal">
-            S/ {{ productoSeleccionado?.precio }}
+            S/ {{ precioActual }}
         </p>
         <div class="extras-box">
             <h3>Tamaño</h3>
             <div class="extras">
-                <button *ngFor="let t of tamanos" [class.activo]="tamanoSeleccionado === t"
-                    (click)="tamanoSeleccionado = t">
+                <button *ngFor="let t of tamanos" 
+                    [class.activo]="tamanoSeleccionado === t"
+                    (click)="seleccionarTamano(t)">
                     {{ t }}
                 </button>
             </div>

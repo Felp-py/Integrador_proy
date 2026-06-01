@@ -19,19 +19,65 @@
             <h2>Historial de Pedidos</h2>
         </div>
         <div class="seccion-mes">
-            <h2>Ventas por Mes</h2>
-            <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
-                <div class="mes-header">
-                    <h3>📅 {{ mes.mes_nombre }}</h3>
-                    <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
-                </div>
-                <div class="mes-detalle">
-                    <span>🧾 Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
-                    <span class="pago-efectivo">💵 Efectivo: <strong>{{ mes.efectivo }}</strong></span>
-                    <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
-                    <span class="pago-yape">📱 Yape: <strong>{{ mes.yape }}</strong></span>
-                </div>
+            <h2>Ventas</h2>
+
+            <!-- Tabs -->
+            <div class="tabs-ventas">
+                <button [class.tab-activo]="vistaSeleccionada === 'dia'" (click)="vistaSeleccionada = 'dia'">Por
+                    Día</button>
+                <button [class.tab-activo]="vistaSeleccionada === 'semana'" (click)="vistaSeleccionada = 'semana'">Por
+                    Semana</button>
+                <button [class.tab-activo]="vistaSeleccionada === 'mes'" (click)="vistaSeleccionada = 'mes'">Por
+                    Mes</button>
             </div>
+
+            <!-- Por Día -->
+            <ng-container *ngIf="vistaSeleccionada === 'dia'">
+                <div class="tabla-mes" *ngFor="let d of ventasPorDia">
+                    <div class="mes-header">
+                        <h3>📅 {{ d.dia_nombre }}</h3>
+                        <span class="total-mes">S/ {{ d.total_ventas | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="mes-detalle">
+                        <span>🧾 Pedidos: <strong>{{ d.total_pedidos }}</strong></span>
+                        <span class="pago-efectivo">💵 Efectivo: <strong>{{ d.efectivo }}</strong></span>
+                        <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ d.tarjeta }}</strong></span>
+                        <span class="pago-yape">📱 Yape: <strong>{{ d.yape }}</strong></span>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- Por Semana -->
+            <ng-container *ngIf="vistaSeleccionada === 'semana'">
+                <div class="tabla-mes" *ngFor="let s of ventasPorSemana">
+                    <div class="mes-header">
+                        <h3>📅 {{ s.semana_nombre }}</h3>
+                        <span class="total-mes">S/ {{ s.total_ventas | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="mes-detalle">
+                        <span>🧾 Pedidos: <strong>{{ s.total_pedidos }}</strong></span>
+                        <span class="pago-efectivo">💵 Efectivo: <strong>{{ s.efectivo }}</strong></span>
+                        <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ s.tarjeta }}</strong></span>
+                        <span class="pago-yape">📱 Yape: <strong>{{ s.yape }}</strong></span>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- Por Mes -->
+            <ng-container *ngIf="vistaSeleccionada === 'mes'">
+                <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
+                    <div class="mes-header">
+                        <h3>📅 {{ mes.mes_nombre }}</h3>
+                        <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="mes-detalle">
+                        <span>🧾 Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
+                        <span class="pago-efectivo">💵 Efectivo: <strong>{{ mes.efectivo }}</strong></span>
+                        <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
+                        <span class="pago-yape">📱 Yape: <strong>{{ mes.yape }}</strong></span>
+                    </div>
+                </div>
+            </ng-container>
         </div>
         <h3 style="margin-bottom:20px;color:#5b2d0f">
             Pedidos recibidos:

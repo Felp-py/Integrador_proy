@@ -32,18 +32,17 @@ export class PedidoService {
   contador = 0;
 
   constructor(private socket: SocketService) {
-    // 🟢 Nos conectamos al socket inmediatamente para actualizar nuestro BehaviorSubject
+    //  actualizar 
     this.socket.escucharPedidos().subscribe((pedidosDesdeServidor) => {
       this.pedidos = pedidosDesdeServidor;
       this.pedidosSubject.next(this.pedidos);
     });
   }
 
-  agregarPedido(items: PedidoItem[], pago: 'Efectivo' | 'Tarjeta' | 'Yape', total: number) {
+  agregarPedido(items: PedidoItem[], pago: 'Efectivo' | 'Tarjeta' | 'Yape', total: number, id?: number) {
     this.contador++;
-
     const nuevo: Pedido = {
-      id: Date.now(),
+      id: id || Date.now(),
       numero: this.contador,
       items,
       estado: 'pendiente',
@@ -51,12 +50,10 @@ export class PedidoService {
       total
     };
 
-    // En lugar de pushear localmente, se lo enviamos al servidor por el socket.
-    // El servidor responderá a todos con la lista actualizada y el constructor de arriba lo recibirá.
     this.socket.enviarPedido(nuevo);
   }
 
-  // Método por si el cajero/cocina actualiza de forma masiva (ej. reordenar o limpiar)
+  //el cajero/cocina actualiza 
   actualizarPedidos(pedidos: Pedido[]) {
     this.socket.actualizarPedidos(pedidos);
   }

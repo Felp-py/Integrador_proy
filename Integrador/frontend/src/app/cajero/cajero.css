@@ -439,3 +439,23 @@ textarea:focus{
     color:white;
     transform:translateY(-2px);
 }
+
+/* BOTÓN CANCELAR ÚLTIMO PEDIDO */
+.cancelar-pedido {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 20px;
+  background: #c0392b;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-bottom: 10px;
+}
+
+.cancelar-pedido:hover {
+  background: #e74c3c;
+  transform: translateY(-2px);
+}

@@ -1,4 +1,4 @@
-import { Component,  OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,8 @@ import { Pedido, PedidoItem } from '../pedido';
 export class Cajero implements OnInit {
   constructor(
     private pedidoService: PedidoService, // Inyectas PedidoService en vez de SocketService directamente
-    private router: Router
+    private router: Router,
+    private changeDetectorRef: ChangeDetectorRef
   ) { }
 
   carrito: PedidoItem[] = [];
@@ -25,6 +26,8 @@ export class Cajero implements OnInit {
   observacion = '';
 
   productoSeleccionado: PedidoItem | null = null;
+
+  precioActual = 0;
 
   mostrarModal = false;
 
@@ -49,6 +52,7 @@ export class Cajero implements OnInit {
         data.forEach(item => {
           this.stockMap[item.id] = item.stock_actual;
         });
+        this.changeDetectorRef.detectChanges(); // Asegura que Angular actualice la vista con el nuevo stock
       });
   }
 
@@ -127,7 +131,7 @@ export class Cajero implements OnInit {
   agregar(producto: PedidoItem) {
 
     this.productoSeleccionado = producto;
-
+    this.precioActual = producto.precio;
     this.mostrarModal = true;
 
   }
@@ -145,6 +149,8 @@ export class Cajero implements OnInit {
     this.tamanoSeleccionado = 'Personal';
 
   }
+
+
 
   confirmarProducto() {
 
@@ -200,7 +206,23 @@ export class Cajero implements OnInit {
       this.extrasSeleccionados.push(extra);
 
     }
+    this.actualizarPrecio();
 
+  }
+
+
+  seleccionarTamano(tamano: string) {
+    this.tamanoSeleccionado = tamano;
+    this.actualizarPrecio();
+  }
+
+  actualizarPrecio() {
+    if (!this.productoSeleccionado) return;
+    let precio = this.productoSeleccionado.precio;
+    if (this.tamanoSeleccionado === 'Mediana') precio += 3;
+    if (this.tamanoSeleccionado === 'Grande') precio += 6;
+    precio += this.extrasSeleccionados.length * 2;
+    this.precioActual = precio;
   }
 
   eliminar(index: number) {
@@ -229,14 +251,17 @@ export class Cajero implements OnInit {
   procesarPago() {
     if (this.carrito.length === 0) return;
 
-    // El servicio se encarga de armar el ID, el número correlativo y disparar el Socket
+    const pedidoId = Date.now(); 
+    this.ultimoPedidoId = pedidoId; // mismo id
+
+    //  el ID
     this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
-      this.total
+      this.total,
+      pedidoId
     );
 
-    this.ultimoPedidoId = Date.now();
     this.carrito = [];
     this.mostrarPago = false;
     this.cargarStock(); // Actualizamos el stock después de realizar el pedido

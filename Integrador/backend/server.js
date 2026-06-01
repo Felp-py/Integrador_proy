@@ -236,6 +236,53 @@ app.get('/ventas-por-mes', async (req, res) => {
   }
 });
 
+// Ventas por día 
+app.get('/ventas-por-dia', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+        DATE(creado_en) as dia,
+        DATE_FORMAT(creado_en, '%d/%m/%Y') as dia_nombre,
+        COUNT(*) as total_pedidos,
+        SUM(total) as total_ventas,
+        SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
+        SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
+        SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
+       FROM pedidos
+       WHERE estado = 'entregado'
+       AND creado_en >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       GROUP BY DATE(creado_en)
+       ORDER BY dia DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Ventas por semana
+app.get('/ventas-por-semana', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+        YEARWEEK(creado_en, 1) as semana,
+        DATE_FORMAT(MIN(creado_en), 'Semana del %d/%m/%Y') as semana_nombre,
+        COUNT(*) as total_pedidos,
+        SUM(total) as total_ventas,
+        SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
+        SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
+        SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
+       FROM pedidos
+       WHERE estado = 'entregado'
+       GROUP BY YEARWEEK(creado_en, 1)
+       ORDER BY semana DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Lista de productos del menú
 app.get('/productos', async (req, res) => {

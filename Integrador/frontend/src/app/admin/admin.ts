@@ -1,4 +1,4 @@
-import { Component,ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
 import { SocketService } from '../socket';
@@ -16,16 +16,25 @@ export class Admin {
     public auth: AuthService,
     private socket: SocketService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   historialPedidos: any[] = [];
   ventasPorMes: any[] = []; // cambio
+  ventasPorDia: any[] = [];
+  ventasPorSemana: any[] = [];
+  vistaSeleccionada: 'dia' | 'semana' | 'mes' = 'mes';
 
   ngOnInit() {
-    this.cargarHistorial(); // cambio
-    this.cargarVentasPorMes(); //cambio
-    this.socket.escucharPedidos().subscribe((pedidos: any[]) => {
-      console.log('ADMIN RECIBIÓ:', pedidos);
+    this.cargarHistorial();
+    this.cargarVentasPorMes();
+    this.cargarVentasPorDia();
+    this.cargarVentasPorSemana();
+
+    this.socket.escucharPedidos().subscribe(() => {
+      this.cargarHistorial();
+      this.cargarVentasPorMes();
+      this.cargarVentasPorDia();
+      this.cargarVentasPorSemana();
       this.cdr.detectChanges();
     });
   }
@@ -41,10 +50,28 @@ export class Admin {
   }
 
   cargarVentasPorMes() {
-  fetch('http://localhost:3000/ventas-por-mes')
+    fetch('http://localhost:3000/ventas-por-mes')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        this.ventasPorMes = data;
+        this.cdr.detectChanges();
+      });
+  }
+
+  cargarVentasPorDia() {
+  fetch('http://localhost:3000/ventas-por-dia')
     .then(res => res.json())
     .then((data: any[]) => {
-      this.ventasPorMes = data;
+      this.ventasPorDia = data;
+      this.cdr.detectChanges();
+    });
+}
+
+cargarVentasPorSemana() {
+  fetch('http://localhost:3000/ventas-por-semana')
+    .then(res => res.json())
+    .then((data: any[]) => {
+      this.ventasPorSemana = data;
       this.cdr.detectChanges();
     });
 }
@@ -73,7 +100,8 @@ export class Admin {
 
     fetch(`http://localhost:3000/pedidos/${id}`, { method: 'DELETE' })
       .then(() => {
-        this.historialPedidos = this.historialPedidos.filter(p => p.id !== id);
+        this.cargarHistorial();
+        this.cargarVentasPorMes();
         this.cdr.detectChanges();
       })
       .catch(err => console.error('Error al cancelar pedido:', err));
