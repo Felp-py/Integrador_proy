@@ -15,11 +15,52 @@
         </button>
     </div>
     <div class="panel">
+
+        <!-- PESTAÑAS -->
         <div class="header-panel">
-            <h2>Historial de Pedidos</h2>
+            <h2>Panel de Ventas</h2>
+            <div class="tabs">
+                <button [class.activo]="vistaActual === 'historial'" (click)="vistaActual = 'historial'">Historial</button>
+                <button [class.activo]="vistaActual === 'dia'"       (click)="vistaActual = 'dia'">Por Día</button>
+                <button [class.activo]="vistaActual === 'semana'"    (click)="vistaActual = 'semana'">Por Semana</button>
+                <button [class.activo]="vistaActual === 'mes'"       (click)="vistaActual = 'mes'">Por Mes</button>
+            </div>
         </div>
-        <div class="seccion-mes">
-            <h2>Ventas por Mes</h2>
+
+        <!-- VISTA: POR DÍA -->
+        <ng-container *ngIf="vistaActual === 'dia'">
+            <div class="tabla-mes" *ngFor="let d of ventasPorDia">
+                <div class="mes-header">
+                    <h3>{{ d.dia_nombre }}</h3>
+                    <span class="total-mes">S/ {{ d.total_ventas | number:'1.2-2' }}</span>
+                </div>
+                <div class="mes-detalle">
+                    <span>Pedidos: <strong>{{ d.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ d.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ d.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ d.yape }}</strong></span>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- VISTA: POR SEMANA -->
+        <ng-container *ngIf="vistaActual === 'semana'">
+            <div class="tabla-mes" *ngFor="let s of ventasPorSemana">
+                <div class="mes-header">
+                    <h3>{{ s.desde }} — {{ s.hasta }}</h3>
+                    <span class="total-mes">S/ {{ s.total_ventas | number:'1.2-2' }}</span>
+                </div>
+                <div class="mes-detalle">
+                    <span>Pedidos: <strong>{{ s.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ s.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ s.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ s.yape }}</strong></span>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- VISTA: POR MES -->
+        <ng-container *ngIf="vistaActual === 'mes'">
             <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
                 <div class="mes-header">
                     <h3>{{ mes.mes_nombre }}</h3>
@@ -32,56 +73,56 @@
                     <span class="pago-yape">Yape: <strong>{{ mes.yape }}</strong></span>
                 </div>
             </div>
-        </div>
-        <h3 style="margin-bottom:20px;color:#5b2d0f">
-            Pedidos recibidos:
-            {{ historialPedidos.length }}
-        </h3>
-        <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">
-            No hay pedidos todavía
-        </div>
-        <div class="pedido-card" *ngFor="let pedido of historialPedidos">
-            <div class="pedido-header">
-                <h3>
-                    Ticket #{{ pedido.id.toString().slice(-4) }}
-                </h3>
-                <span class="badge-pago" [ngClass]="{
-                    'pago-efectivo': pedido.pago === 'Efectivo',
-                    'pago-tarjeta':  pedido.pago === 'Tarjeta',
-                    'pago-yape':     pedido.pago === 'Yape'
-                }">
-                    {{ pedido.pago }}
-                </span>
-                <span class="estado">{{ pedido.estado }}</span>
-                <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">
-                    Anular
-                </button>
+        </ng-container>
+
+        <!-- VISTA: HISTORIAL -->
+        <ng-container *ngIf="vistaActual === 'historial'">
+            <h3 style="margin-bottom:20px;color:#5b2d0f">
+                Pedidos recibidos: {{ historialPedidos.length }}
+            </h3>
+            <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">
+                No hay pedidos todavía
             </div>
-            <div class="item" *ngFor="let item of pedido.items">
-                <strong>
-                    {{ item.nombre }}
-                </strong>
-                <p>
-                    Tamaño:
-                    {{ item.tamano }}
-                </p>
-                <small *ngIf="item.extras?.length">
-                    Extras:
-                    {{ item.extras.join(', ') }}
-                </small>
-                <br>
-                <small *ngIf="item.observacion">
-                    Obs:
-                    {{ item.observacion }}
-                </small>
-                <div class="precio">
-                    S/ {{ item.precio }}
+            <div class="pedido-card" *ngFor="let pedido of historialPedidos">
+                <div class="pedido-header">
+                    <h3>
+                        Ticket #{{ pedido.id.toString().slice(-4) }}
+                    </h3>
+                    <small style="color:#888; font-size:13px;">{{ pedido.creado_en | date:'dd/MM/yyyy HH:mm' }}</small>
+                    <span class="badge-pago" [ngClass]="{
+                        'pago-efectivo': pedido.pago === 'Efectivo',
+                        'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                        'pago-yape':     pedido.pago === 'Yape'
+                    }">
+                        {{ pedido.pago }}
+                    </span>
+                    <span class="estado">{{ pedido.estado }}</span>
+                    <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">
+                        Anular
+                    </button>
+                </div>
+                <div class="item" *ngFor="let item of pedido.items">
+                    <strong>
+                        {{ item.nombre }}
+                    </strong>
+                    <p>
+                        Tamaño: {{ item.tamano }}
+                    </p>
+                    <small *ngIf="item.extras?.length">
+                        Extras: {{ item.extras.join(', ') }}
+                    </small>
+                    <br>
+                    <small *ngIf="item.observacion">
+                        Obs: {{ item.observacion }}
+                    </small>
+                    <div class="precio">
+                        S/ {{ item.precio }}
+                    </div>
+                </div>
+                <div class="total">
+                    Total: S/ {{ getTotalPedido(pedido) }}
                 </div>
             </div>
-            <div class="total">
-                Total:
-                S/ {{ getTotalPedido(pedido) }}
-            </div>
-        </div>
+        </ng-container>
     </div>
 </div>

@@ -210,6 +210,54 @@ app.get('/ventas-por-mes', async (req, res) => {
   }
 });
 
+// Ventas por semana
+app.get('/ventas-por-semana', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT
+        YEARWEEK(creado_en, 1) as semana_key,
+        DATE_FORMAT(MIN(creado_en), '%d/%m/%Y') as desde,
+        DATE_FORMAT(MAX(creado_en), '%d/%m/%Y') as hasta,
+        COUNT(*) as total_pedidos,
+        SUM(total) as total_ventas,
+        SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
+        SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
+        SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
+        FROM pedidos
+        WHERE estado != 'cancelado'
+        GROUP BY YEARWEEK(creado_en, 1)
+        ORDER BY semana_key DESC
+        LIMIT 12`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Ventas por día
+app.get('/ventas-por-dia', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT
+        DATE(creado_en) as dia,
+        DATE_FORMAT(creado_en, '%d/%m/%Y') as dia_nombre,
+        COUNT(*) as total_pedidos,
+        SUM(total) as total_ventas,
+        SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
+        SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
+        SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
+        FROM pedidos
+        WHERE estado != 'cancelado'
+        GROUP BY DATE(creado_en)
+        ORDER BY dia DESC
+        LIMIT 30`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Lista de productos del menú
 app.get('/productos', async (req, res) => {
@@ -225,11 +273,11 @@ app.get('/productos', async (req, res) => {
 
 //parte añadadido eliminacion permanedenente de pedidos
 app.delete('/pedidos/:id', async (req, res) => {
-  const { id } = req.params; 
+  const id = Number(req.params.id);  
   try {
     await db.query('DELETE FROM pedidos WHERE id = ?', [id]);
-    pedidos = pedidos.filter(p => p.id != id);
-    io.emit('pedidosActualizados', pedidos);
+    pedidos = pedidos.filter(p => Number(p.id) !== id);  
+    io.emit('pedidosActualizados', pedidos);  
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -247,6 +295,37 @@ app.get('/stock', async (req, res) => {
         ORDER BY p.id`
     );
     res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Stock de ingredientes extras
+app.get('/stock-ingredientes', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM ingredientes ORDER BY id'
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Descontar ingrediente cuando se usa en un pedido
+app.post('/stock-ingredientes/descontar', async (req, res) => {
+  const { nombres } = req.body; // array de nombres ej: ['Queso extra', 'Tocino extra']
+  if (!nombres || nombres.length === 0) return res.json({ ok: true });
+
+  try {
+    for (const nombre of nombres) {
+      const base = nombre.replace(' extra', '').trim();
+      await db.query(
+        'UPDATE ingredientes SET stock_actual = stock_actual - 1 WHERE nombre = ? AND stock_actual > 0',
+        [base]
+      );
+    }
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -439,3 +439,31 @@ textarea:focus{
     color:white;
     transform:translateY(-2px);
 }
+
+.cancelar-pedido {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 16px;
+    background: #c0392b;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 10px;
+}
+
+.cancelar-pedido:hover {
+    background: #a93226;
+    transform: translateY(-2px);
+}
+
+.stock-bajo {
+    border: 2px solid orange !important;
+    color: #b36200;
+}
+
+.stock-bajo:hover {
+    background: #fff3e0;
+}

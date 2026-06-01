@@ -1,4 +1,4 @@
-import { Component,  OnInit } from '@angular/core';
+import { Component,  OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,8 @@ import { Pedido, PedidoItem } from '../pedido';
 export class Cajero implements OnInit {
   constructor(
     private pedidoService: PedidoService, 
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   carrito: PedidoItem[] = [];
@@ -29,22 +30,50 @@ export class Cajero implements OnInit {
   tamanos = ['Personal', 'Mediana', 'Grande'];
   tamanoSeleccionado = 'Personal';
   stockMap: { [producto_id: number]: number } = {};
+  stockIngredientes: { [nombre: string]: number } = {};
+  stockCargado = false;
 
   ngOnInit() {
     this.cargarStock();
+    this.cargarStockIngredientes();
   }
 
   cargarStock() {
     fetch('http://localhost:3000/stock')
       .then(res => res.json())
       .then((data: any[]) => {
+        const mapa: { [id: number]: number } = {};
         data.forEach(item => {
-          this.stockMap[item.id] = item.stock_actual;
+          mapa[item.id] = item.stock_actual;
         });
-      });
+        this.stockMap = { ...mapa };
+        this.stockCargado = true;
+        this.cdr.detectChanges();
+      })
+      .catch(err => console.error('Error cargando stock:', err));
   }
 
+  cargarStockIngredientes() {
+    fetch('http://localhost:3000/stock-ingredientes')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const mapa: { [nombre: string]: number } = {};
+        data.forEach(item => {
+          mapa[item.nombre] = item.stock_actual;
+        });
+        this.stockIngredientes = { ...mapa };
+        this.cdr.detectChanges();
+      })
+      .catch(err => console.error('Error cargando stock ingredientes:', err));
+  }
 
+  // Para saber si un extra tiene stock disponible
+  tieneStockExtra(extra: string): boolean {
+    const base = extra.replace(' extra', '').trim();
+    const stock = this.stockIngredientes[base];
+    if (stock === undefined) return true; 
+    return stock > 0;
+  }
 
   ingredientesExtra = [
     'Queso extra',
@@ -98,13 +127,11 @@ export class Cajero implements OnInit {
   ]
 
   get productosFiltrados() {
-
     return this.productos.filter(
       producto =>
         producto.categoria ===
         this.categoriaSeleccionada
     );
-
   }
 
   esBebidaOComplemento(): boolean {
@@ -127,21 +154,21 @@ export class Cajero implements OnInit {
     this.tamanoSeleccionado = 'Personal';
   }
 
+  get precioModalActual(): number {
+    if (!this.productoSeleccionado) return 0;
+    let precio = this.productoSeleccionado.precio;
+    if (this.tamanoSeleccionado === 'Mediana') precio += 3;
+    if (this.tamanoSeleccionado === 'Grande')  precio += 6;
+    precio += this.extrasSeleccionados.length * 2;
+    return precio;
+  }
+
   confirmarProducto() {
     if (!this.productoSeleccionado) return;
-    let precioFinal =
-      this.productoSeleccionado.precio;
-    if (this.tamanoSeleccionado === 'Mediana') {
-      precioFinal += 3;
-    }
-    if (this.tamanoSeleccionado === 'Grande') {
-      precioFinal += 6;
-    }
-    precioFinal +=
-      this.extrasSeleccionados.length * 2;
+    const precioFinal = this.precioModalActual; 
     this.carrito.push({
       ...this.productoSeleccionado,
-      producto_id: this.productoSeleccionado.producto_id, //cambio
+      producto_id: this.productoSeleccionado.producto_id,
       tamano: this.tamanoSeleccionado,
       extras: [...this.extrasSeleccionados],
       observacion: this.observacion,
@@ -181,17 +208,42 @@ export class Cajero implements OnInit {
 
   procesarPago() {
     if (this.carrito.length === 0) return;
-    this.pedidoService.agregarPedido(
+
+    this.ultimoPedidoId = this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
       this.total
     );
 
-    this.ultimoPedidoId = Date.now();
+    // Recolectar todos los extras usados en el pedido
+    const extrasUsados: string[] = [];
+    this.carrito.forEach(item => {
+      if (item.extras && item.extras.length > 0) {
+        extrasUsados.push(...item.extras);
+      }
+    });
+
+    // Descontar del stock de ingredientes
+    if (extrasUsados.length > 0) {
+      fetch('http://localhost:3000/stock-ingredientes/descontar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombres: extrasUsados })
+      }).then(() => this.cargarStockIngredientes());
+    }
+
     this.carrito = [];
     this.mostrarPago = false;
-    this.cargarStock(); 
+    this.cargarStock();
+    this.cargarStockIngredientes(); 
     alert('Pago realizado correctamente y enviado a cocina');
+  }
+
+  esStockBajoExtra(extra: string): boolean {
+    const base = extra.replace(' extra', '').trim();
+    const stock = this.stockIngredientes[base];
+    if (stock === undefined) return false;
+    return stock > 0 && stock <= 5; // naranja si está entre 1 y 5
   }
 
   cancelarUltimoPedido() {
@@ -206,10 +258,11 @@ export class Cajero implements OnInit {
       .then(() => {
         alert('Pedido cancelado y eliminado permanentemente.');
         this.ultimoPedidoId = null;
+        this.cargarStock();
+        this.cdr.detectChanges();
       })
       .catch(err => console.error('Error al cancelar:', err));
   }
-
 
   volverLogin() {
     this.router.navigate(['/login']);

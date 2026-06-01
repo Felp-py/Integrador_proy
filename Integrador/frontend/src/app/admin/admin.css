@@ -237,3 +237,30 @@ body{
 .mes-detalle .pago-efectivo { color: #1e8449; font-weight: bold; }
 .mes-detalle .pago-tarjeta  { color: #1a5276; font-weight: bold; }
 .mes-detalle .pago-yape     { color: #6c3483; font-weight: bold; }
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0 20px 0;
+    flex-wrap: wrap;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 14px;
+    background: #e8d3ad;
+    color: #4b250f;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.tabs button:hover {
+    background: #d4b98a;
+}
+
+.tabs button.activo {
+    background: #5b2d0f;
+    color: white;
+}

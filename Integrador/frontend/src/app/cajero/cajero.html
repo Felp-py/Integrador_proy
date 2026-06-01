@@ -52,10 +52,10 @@
                 <h3>{{ p.nombre }}</h3>
                 <span>S/ {{ p.precio }}</span>
                 <small [style.color]="
-                    stockMap[p.producto_id] === undefined ? 'gray' :
+                    !stockCargado ? 'gray' :
                     stockMap[p.producto_id] === 0 ? 'red' :
                     stockMap[p.producto_id] <= 5 ? 'orange' : 'green'">
-                    Stock: {{ stockMap[p.producto_id]  }}
+                    Stock: {{ stockCargado ? stockMap[p.producto_id] : '...' }}
                 </small>
             </button>
         </div>
@@ -67,7 +67,7 @@
             {{ productoSeleccionado?.nombre }}
         </h2>
         <p class="precio-modal">
-            S/ {{ productoSeleccionado?.precio }}
+            S/ {{ precioModalActual }}
         </p>
         <div class="extras-box">
             <h3>Tamaño</h3>
@@ -82,9 +82,15 @@
             <div class="extras-box">
                 <h3>Ingredientes Extra</h3>
                 <div class="extras">
-                    <button *ngFor="let extra of ingredientesExtra" (click)="toggleExtra(extra)"
-                        [class.activo]="extrasSeleccionados.includes(extra)">
+                    <button *ngFor="let extra of ingredientesExtra"
+                        (click)="tieneStockExtra(extra) && toggleExtra(extra)"
+                        [class.activo]="extrasSeleccionados.includes(extra)"
+                        [class.stock-bajo]="esStockBajoExtra(extra)"
+                        [disabled]="!tieneStockExtra(extra)"
+                        [title]="!tieneStockExtra(extra) ? 'Sin stock' : esStockBajoExtra(extra) ? 'Stock bajo' : ''">
                         {{ extra }}
+                        <small *ngIf="!tieneStockExtra(extra)" style="color:red; display:block; font-size:10px;">Sin stock</small>
+                        <small *ngIf="esStockBajoExtra(extra)" style="color:orange; display:block; font-size:10px;">Stock bajo</small>
                     </button>
                 </div>
             </div>
