@@ -312,6 +312,30 @@ app.get('/stock-ingredientes', async (req, res) => {
   }
 });
 
+// Stock completo para admin
+app.get('/stock-admin', async (req, res) => {
+  try {
+    const [productos] = await db.query(
+      `SELECT p.id, p.nombre, p.categoria,
+        i.stock_actual, i.stock_minimo, i.stock_maximo
+        FROM productos p
+        JOIN inventario i ON i.producto_id = p.id
+        WHERE p.activo = TRUE
+        ORDER BY p.categoria, p.nombre`
+    );
+
+    const [ingredientes] = await db.query(
+      `SELECT id, nombre, stock_actual, stock_minimo
+        FROM ingredientes
+        ORDER BY nombre`
+    );
+
+    res.json({ productos, ingredientes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Descontar ingrediente cuando se usa en un pedido
 app.post('/stock-ingredientes/descontar', async (req, res) => {
   const { nombres } = req.body; // array de nombres ej: ['Queso extra', 'Tocino extra']

@@ -24,6 +24,7 @@
                 <button [class.activo]="vistaActual === 'dia'"       (click)="vistaActual = 'dia'">Por Día</button>
                 <button [class.activo]="vistaActual === 'semana'"    (click)="vistaActual = 'semana'">Por Semana</button>
                 <button [class.activo]="vistaActual === 'mes'"       (click)="vistaActual = 'mes'">Por Mes</button>
+                <button [class.activo]="vistaActual === 'stock'" (click)="vistaActual = 'stock'">Stock</button>
             </div>
         </div>
 
@@ -123,6 +124,48 @@
                     Total: S/ {{ getTotalPedido(pedido) }}
                 </div>
             </div>
+        </ng-container>
+
+        <!-- VISTA: STOCK -->
+        <ng-container *ngIf="vistaActual === 'stock'">
+
+        <h3 style="color:#5b2d0f; margin-bottom:15px;">Ingredientes</h3>
+        <div class="stock-grid">
+            <div class="stock-card" *ngFor="let ing of stockIngredientes"
+            [class.stock-ok]="ing.stock_actual > ing.stock_minimo"
+            [class.stock-bajo]="ing.stock_actual <= ing.stock_minimo && ing.stock_actual > 0"
+            [class.stock-agotado]="ing.stock_actual === 0">
+            <h4>{{ ing.nombre }}</h4>
+            <p class="stock-numero">{{ ing.stock_actual }}</p>
+            <small>Mínimo: {{ ing.stock_minimo }}</small>
+            <span class="stock-badge"
+                [style.background]="
+                ing.stock_actual === 0 ? '#c0392b' :
+                ing.stock_actual <= ing.stock_minimo ? 'orange' : '#27ae60'">
+                {{ ing.stock_actual === 0 ? 'Agotado' : ing.stock_actual <= ing.stock_minimo ? 'Stock bajo' : 'OK' }}
+            </span>
+            </div>
+        </div>
+
+        <h3 style="color:#5b2d0f; margin:25px 0 15px 0;">Productos</h3>
+        <div class="stock-grid">
+            <div class="stock-card" *ngFor="let prod of stockProductos"
+            [class.stock-ok]="prod.stock_actual > prod.stock_minimo"
+            [class.stock-bajo]="prod.stock_actual <= prod.stock_minimo && prod.stock_actual > 0"
+            [class.stock-agotado]="prod.stock_actual === 0">
+            <small class="categoria-badge">{{ prod.categoria }}</small>
+            <h4>{{ prod.nombre }}</h4>
+            <p class="stock-numero">{{ prod.stock_actual }}</p>
+            <small>Mínimo: {{ prod.stock_minimo }}</small>
+            <span class="stock-badge"
+                [style.background]="
+                prod.stock_actual === 0 ? '#c0392b' :
+                prod.stock_actual <= prod.stock_minimo ? 'orange' : '#27ae60'">
+                {{ prod.stock_actual === 0 ? 'Agotado' : prod.stock_actual <= prod.stock_minimo ? 'Stock bajo' : 'OK' }}
+            </span>
+            </div>
+        </div>
+
         </ng-container>
     </div>
 </div>

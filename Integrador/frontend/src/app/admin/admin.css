@@ -264,3 +264,65 @@ body{
     background: #5b2d0f;
     color: white;
 }
+
+.stock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stock-card {
+    background: white;
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 2px solid #e8d3ad;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stock-card h4 {
+    color: #4b250f;
+    font-size: 14px;
+    margin: 0;
+}
+
+.stock-numero {
+    font-size: 32px;
+    font-weight: bold;
+    color: #4b250f;
+    margin: 5px 0;
+}
+
+.stock-badge {
+    color: white;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.categoria-badge {
+    font-size: 10px;
+    background: #f0dfc2;
+    color: #4b250f;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.stock-agotado {
+    border-color: #c0392b;
+}
+
+.stock-bajo {
+    border-color: orange;
+}
+
+.stock-ok {
+    border-color: #27ae60;
+}

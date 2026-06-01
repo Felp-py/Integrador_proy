@@ -26,6 +26,8 @@ export class Admin implements OnInit, OnDestroy {
   ventasPorSemana: any[] = [];
   ventasPorDia: any[]    = [];
   vistaActual: string    = 'historial';
+  stockProductos: any[] = [];
+  stockIngredientes: any[] = [];
 
   ngOnInit() {
     this.cargarTodo();
@@ -42,7 +44,8 @@ export class Admin implements OnInit, OnDestroy {
     this.cargarHistorial();
     this.cargarVentasPorMes();
     this.cargarVentasPorSemana(); 
-    this.cargarVentasPorDia();    
+    this.cargarVentasPorDia();   
+    this.cargarStock();
   }
 
   cargarHistorial() {
@@ -107,6 +110,16 @@ export class Admin implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       })
       .catch(err => console.error('Error al cancelar pedido:', err));
+  }
+
+  cargarStock() {
+    fetch('http://localhost:3000/stock-admin')
+      .then(res => res.json())
+      .then((data: any) => {
+        this.stockProductos = data.productos;
+        this.stockIngredientes = data.ingredientes;
+        this.cdr.detectChanges();
+      });
   }
 
   logout() {
