@@ -1,4 +1,3 @@
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -32,21 +31,58 @@ export class Cajero implements OnInit {
   tamanos = ['Personal', 'Mediana', 'Grande'];
   tamanoSeleccionado = 'Personal';
   stockMap: { [producto_id: number]: number } = {};
+  stockCargado = false;
+  stockIngredientes: { [nombre: string]: number } = {}; // ← agregado
+  mostrarConfirmacion = false;
+  mensajeConfirmacion = '';
 
   ngOnInit() {
     this.cargarStock();
+    this.cargarStockIngredientes(); // ← agregado
   }
 
   cargarStock() {
     fetch('http://localhost:3000/stock')
       .then(res => res.json())
       .then((data: any[]) => {
+        const mapa: { [id: number]: number } = {};
         data.forEach(item => {
-          this.stockMap[item.id] = item.stock_actual;
+          mapa[item.id] = item.stock_actual;
         });
+        this.stockMap = { ...mapa };
+        this.stockCargado = true;
         this.cdr.detectChanges();
       })
       .catch(err => console.error('ERROR STOCK:', err));
+  }
+
+  // ← método agregado
+  cargarStockIngredientes() {
+    fetch('http://localhost:3000/stock-ingredientes')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const mapa: { [nombre: string]: number } = {};
+        data.forEach(item => {
+          mapa[item.nombre] = item.stock_actual;
+        });
+        this.stockIngredientes = { ...mapa };
+        this.cdr.detectChanges();
+      })
+      .catch(err => console.error('Error stock ingredientes:', err));
+  }
+
+  tieneStockExtra(extra: string): boolean {
+    const base = extra.replace(' extra', '').trim();
+    const stock = this.stockIngredientes[base];
+    if (stock === undefined) return true;
+    return stock > 0;
+  }
+
+  esStockBajoExtra(extra: string): boolean {
+    const base = extra.replace(' extra', '').trim();
+    const stock = this.stockIngredientes[base];
+    if (stock === undefined) return false;
+    return stock > 0 && stock <= 5;
   }
 
   ingredientesExtra = [
@@ -175,25 +211,47 @@ export class Cajero implements OnInit {
   procesarPago() {
     if (this.carrito.length === 0) return;
 
-    const pedidoId = Date.now();
-    this.ultimoPedidoId = pedidoId;
-
-    this.pedidoService.agregarPedido(
+    // ← captura el id real devuelto por el servicio
+    const idGenerado = this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
-      this.total,
-      pedidoId
+      this.total
     );
+    this.ultimoPedidoId = idGenerado ?? null;
+
+    const extrasUsados: string[] = [];
+    this.carrito.forEach(item => {
+      if (item.extras && item.extras.length > 0) {
+        extrasUsados.push(...item.extras);
+      }
+    });
+
+    if (extrasUsados.length > 0) {
+      fetch('http://localhost:3000/stock-ingredientes/descontar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombres: extrasUsados })
+      });
+    }
 
     this.carrito = [];
     this.mostrarPago = false;
-    this.cargarStock();
-    alert('Pago realizado correctamente y enviado a cocina');
+
+    setTimeout(() => {
+      this.cargarStock();
+      this.cargarStockIngredientes();
+    }, 500);
+
+    this.mensajeConfirmacion = 'Pago realizado correctamente\ny enviado a cocina';
+    this.mostrarConfirmacion = true;
+    setTimeout(() => this.mostrarConfirmacion = false, 2500);
   }
 
   cancelarUltimoPedido() {
     if (!this.ultimoPedidoId) {
-      alert('No hay pedido reciente para cancelar.');
+      this.mensajeConfirmacion = 'No hay pedido reciente\npara cancelar.';
+      this.mostrarConfirmacion = true;
+      setTimeout(() => this.mostrarConfirmacion = false, 2500);
       return;
     }
 
@@ -202,9 +260,15 @@ export class Cajero implements OnInit {
 
     fetch(`http://localhost:3000/pedidos/${this.ultimoPedidoId}`, { method: 'DELETE' })
       .then(() => {
-        alert('Pedido cancelado y eliminado permanentemente.');
         this.ultimoPedidoId = null;
-        this.cargarStock();
+        setTimeout(() => {
+          this.cargarStock();
+          this.cargarStockIngredientes();
+        }, 500);
+        this.mensajeConfirmacion = 'Pedido cancelado.\nEl stock fue recuperado.';
+        this.mostrarConfirmacion = true;
+        setTimeout(() => this.mostrarConfirmacion = false, 2500);
+        this.cdr.detectChanges();
       })
       .catch(err => console.error('Error al cancelar:', err));
   }

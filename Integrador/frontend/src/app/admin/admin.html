@@ -4,119 +4,161 @@
         <h2>Administrador</h2>
         <div class="resumen-card">
             <h3>Total Pedidos</h3>
-            <p>{{ historialPedidos.length }}</p>
+            <p>{{ totalPedidosMostrados }}</p>
         </div>
         <div class="resumen-card">
             <h3>Total Ventas</h3>
-            <p>S/ {{ totalVentas }}</p>
+            <p>S/ {{ totalVentasMostradas | number:'1.2-2' }}</p>
         </div>
-        <button class="logout-btn" (click)="logout()">
-            Cerrar Sesión
-        </button>
+        <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
     </div>
+
     <div class="panel">
+
+        <!-- PESTAÑAS PRINCIPALES -->
         <div class="header-panel">
-            <h2>Historial de Pedidos</h2>
+            <h2>Panel de Ventas</h2>
+            <div class="tabs">
+                <button [class.activo]="vistaActual === 'historial'" (click)="vistaActual = 'historial'">Historial</button>
+                <button [class.activo]="vistaActual === 'dia'"       (click)="vistaActual = 'dia'">Por Día</button>
+                <button [class.activo]="vistaActual === 'semana'"    (click)="vistaActual = 'semana'">Por Semana</button>
+                <button [class.activo]="vistaActual === 'mes'"       (click)="vistaActual = 'mes'">Por Mes</button>
+                <button [class.activo]="vistaActual === 'stock'"     (click)="vistaActual = 'stock'">Stock</button>
+            </div>
         </div>
 
-        <!-- VENTAS POR PERÍODO -->
-        <div class="seccion-mes">
-            <h2>Ventas</h2>
-            <div class="tabs-ventas">
-                <button [class.tab-activo]="vistaSeleccionada === 'dia'"
-                    (click)="vistaSeleccionada = 'dia'">Por Día</button>
-                <button [class.tab-activo]="vistaSeleccionada === 'semana'"
-                    (click)="vistaSeleccionada = 'semana'">Por Semana</button>
-                <button [class.tab-activo]="vistaSeleccionada === 'mes'"
-                    (click)="vistaSeleccionada = 'mes'">Por Mes</button>
+        <!-- VISTA: HISTORIAL -->
+        <ng-container *ngIf="vistaActual === 'historial'">
+            <h3 style="margin-bottom:20px;color:#5b2d0f">
+                Pedidos recibidos: {{ historialPedidos.length }}
+            </h3>
+            <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">No hay pedidos todavía</div>
+            <div class="pedido-card" *ngFor="let pedido of historialPedidos">
+                <div class="pedido-header">
+                    <h3>Ticket #{{ pedido.id.toString().slice(-4) }}</h3>
+                    <small style="color:#888; font-size:13px;">{{ pedido.creado_en | date:'dd/MM/yyyy HH:mm' }}</small>
+                    <span class="badge-pago" [ngClass]="{
+                        'pago-efectivo': pedido.pago === 'Efectivo',
+                        'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                        'pago-yape':     pedido.pago === 'Yape'
+                    }">{{ pedido.pago }}</span>
+                    <span class="estado">{{ pedido.estado }}</span>
+                    <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">Anular</button>
+                </div>
+                <div class="item" *ngFor="let item of pedido.items">
+                    <strong>{{ item.nombre }}</strong>
+                    <p>Tamaño: {{ item.tamano }}</p>
+                    <small *ngIf="item.extras?.length">Extras: {{ item.extras.join(', ') }}</small>
+                    <br>
+                    <small *ngIf="item.observacion">Obs: {{ item.observacion }}</small>
+                    <div class="precio">S/ {{ item.precio }}</div>
+                </div>
+                <div class="total">Total: S/ {{ getTotalPedido(pedido) }}</div>
             </div>
+        </ng-container>
 
-            <!-- Por Día -->
-            <ng-container *ngIf="vistaSeleccionada === 'dia'">
-                <div class="tabla-mes" *ngFor="let d of ventasPorDia">
-                    <div class="mes-header">
-                        <h3>📅 {{ d.dia_nombre }}</h3>
-                        <span class="total-mes">S/ {{ d.total_ventas | number:'1.2-2' }}</span>
-                    </div>
-                    <div class="mes-detalle">
-                        <span>🧾 Pedidos: <strong>{{ d.total_pedidos }}</strong></span>
-                        <span class="pago-efectivo">💵 Efectivo: <strong>{{ d.efectivo }}</strong></span>
-                        <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ d.tarjeta }}</strong></span>
-                        <span class="pago-yape">📱 Yape: <strong>{{ d.yape }}</strong></span>
+        <!-- VISTA: POR DÍA -->
+        <ng-container *ngIf="vistaActual === 'dia'">
+            <div class="tabla-mes" *ngFor="let d of ventasPorDia">
+                <div class="mes-header">
+                    <h3>{{ d.dia_nombre }}</h3>
+                    <span class="total-mes">S/ {{ d.total_ventas | number:'1.2-2' }}</span>
+                </div>
+                <div class="mes-detalle">
+                    <span>Pedidos: <strong>{{ d.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ d.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ d.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ d.yape }}</strong></span>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- VISTA: POR SEMANA -->
+        <ng-container *ngIf="vistaActual === 'semana'">
+            <div class="tabla-mes" *ngFor="let s of ventasPorSemana">
+                <div class="mes-header">
+                    <h3>{{ s.desde }} — {{ s.hasta }}</h3>
+                    <span class="total-mes">S/ {{ s.total_ventas | number:'1.2-2' }}</span>
+                </div>
+                <div class="mes-detalle">
+                    <span>Pedidos: <strong>{{ s.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ s.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ s.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ s.yape }}</strong></span>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- VISTA: POR MES — expandible con lista de pedidos -->
+        <ng-container *ngIf="vistaActual === 'mes'">
+            <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
+                <!-- Cabecera clickeable para expandir -->
+                <div class="mes-header mes-clickeable" (click)="toggleMes(mes.mes)">
+                    <h3>{{ mes.mes_nombre }}</h3>
+                    <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
+                    <span class="expand-icon">{{ mesExpandido === mes.mes ? '▲' : '▼' }}</span>
+                </div>
+                <div class="mes-detalle">
+                    <span>Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ mes.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ mes.yape }}</strong></span>
+                </div>
+                <!-- Lista de pedidos del mes expandida -->
+                <div class="pedidos-del-mes" *ngIf="mesExpandido === mes.mes">
+                    <div class="pedido-mini" *ngFor="let pedido of pedidosDelMes(mes.mes)">
+                        <div class="pedido-mini-header">
+                            <span>Ticket #{{ pedido.id.toString().slice(-4) }}</span>
+                            <small>{{ pedido.creado_en | date:'dd/MM HH:mm' }}</small>
+                            <span class="badge-pago" [ngClass]="{
+                                'pago-efectivo': pedido.pago === 'Efectivo',
+                                'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                                'pago-yape':     pedido.pago === 'Yape'
+                            }">{{ pedido.pago }}</span>
+                            <strong>S/ {{ getTotalPedido(pedido) }}</strong>
+                        </div>
                     </div>
                 </div>
-            </ng-container>
+            </div>
+        </ng-container>
 
-            <!-- Por Semana -->
-            <ng-container *ngIf="vistaSeleccionada === 'semana'">
-                <div class="tabla-mes" *ngFor="let s of ventasPorSemana">
-                    <div class="mes-header">
-                        <h3>📅 {{ s.semana_nombre }}</h3>
-                        <span class="total-mes">S/ {{ s.total_ventas | number:'1.2-2' }}</span>
-                    </div>
-                    <div class="mes-detalle">
-                        <span>🧾 Pedidos: <strong>{{ s.total_pedidos }}</strong></span>
-                        <span class="pago-efectivo">💵 Efectivo: <strong>{{ s.efectivo }}</strong></span>
-                        <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ s.tarjeta }}</strong></span>
-                        <span class="pago-yape">📱 Yape: <strong>{{ s.yape }}</strong></span>
-                    </div>
+        <!-- VISTA: STOCK -->
+        <ng-container *ngIf="vistaActual === 'stock'">
+            <h3 style="color:#5b2d0f; margin-bottom:15px;">Ingredientes</h3>
+            <div class="stock-grid">
+                <div class="stock-card" *ngFor="let ing of stockIngredientes"
+                    [class.stock-ok]="ing.stock_actual > ing.stock_minimo"
+                    [class.stock-bajo]="ing.stock_actual <= ing.stock_minimo && ing.stock_actual > 0"
+                    [class.stock-agotado]="ing.stock_actual === 0">
+                    <h4>{{ ing.nombre }}</h4>
+                    <p class="stock-numero">{{ ing.stock_actual }}</p>
+                    <small>Mínimo: {{ ing.stock_minimo }}</small>
+                    <span class="stock-badge" [style.background]="
+                        ing.stock_actual === 0 ? '#c0392b' :
+                        ing.stock_actual <= ing.stock_minimo ? 'orange' : '#27ae60'">
+                        {{ ing.stock_actual === 0 ? 'Agotado' : ing.stock_actual <= ing.stock_minimo ? 'Stock bajo' : 'OK' }}
+                    </span>
                 </div>
-            </ng-container>
+            </div>
 
-            <!-- Por Mes -->
-            <ng-container *ngIf="vistaSeleccionada === 'mes'">
-                <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
-                    <div class="mes-header">
-                        <h3>📅 {{ mes.mes_nombre }}</h3>
-                        <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
-                    </div>
-                    <div class="mes-detalle">
-                        <span>🧾 Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
-                        <span class="pago-efectivo">💵 Efectivo: <strong>{{ mes.efectivo }}</strong></span>
-                        <span class="pago-tarjeta">💳 Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
-                        <span class="pago-yape">📱 Yape: <strong>{{ mes.yape }}</strong></span>
-                    </div>
+            <h3 style="color:#5b2d0f; margin:25px 0 15px 0;">Productos</h3>
+            <div class="stock-grid">
+                <div class="stock-card" *ngFor="let prod of stockProductos"
+                    [class.stock-ok]="prod.stock_actual > prod.stock_minimo"
+                    [class.stock-bajo]="prod.stock_actual <= prod.stock_minimo && prod.stock_actual > 0"
+                    [class.stock-agotado]="prod.stock_actual === 0">
+                    <small class="categoria-badge">{{ prod.categoria }}</small>
+                    <h4>{{ prod.nombre }}</h4>
+                    <p class="stock-numero">{{ prod.stock_actual }}</p>
+                    <small>Mínimo: {{ prod.stock_minimo }}</small>
+                    <span class="stock-badge" [style.background]="
+                        prod.stock_actual === 0 ? '#c0392b' :
+                        prod.stock_actual <= prod.stock_minimo ? 'orange' : '#27ae60'">
+                        {{ prod.stock_actual === 0 ? 'Agotado' : prod.stock_actual <= prod.stock_minimo ? 'Stock bajo' : 'OK' }}
+                    </span>
                 </div>
-            </ng-container>
-        </div>
+            </div>
+        </ng-container>
 
-        <!-- HISTORIAL DE PEDIDOS -->
-        <h3 style="margin-bottom:20px;color:#5b2d0f">
-            Pedidos recibidos: {{ historialPedidos.length }}
-        </h3>
-        <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">
-            No hay pedidos todavía
-        </div>
-        <div class="pedido-card" *ngFor="let pedido of historialPedidos">
-            <div class="pedido-header">
-                <h3>Ticket #{{ pedido.id.toString().slice(-4) }}</h3>
-                <span class="badge-pago" [ngClass]="{
-                    'pago-efectivo': pedido.pago === 'Efectivo',
-                    'pago-tarjeta':  pedido.pago === 'Tarjeta',
-                    'pago-yape':     pedido.pago === 'Yape'
-                }">
-                    💳 {{ pedido.pago }}
-                </span>
-                <span class="estado">{{ pedido.estado }}</span>
-                <button class="btn-cancelar" (click)="cancelarPedido(pedido.id)">
-                    Anular
-                </button>
-            </div>
-            <div class="item" *ngFor="let item of pedido.items">
-                <strong>{{ item.nombre }}</strong>
-                <p>Tamaño: {{ item.tamano }}</p>
-                <small *ngIf="item.extras?.length">
-                    Extras: {{ item.extras.join(', ') }}
-                </small>
-                <br>
-                <small *ngIf="item.observacion">
-                    Obs: {{ item.observacion }}
-                </small>
-                <div class="precio">S/ {{ item.precio }}</div>
-            </div>
-            <div class="total">
-                Total: S/ {{ getTotalPedido(pedido) }}
-            </div>
-        </div>
     </div>
 </div>

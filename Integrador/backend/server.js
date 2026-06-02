@@ -18,15 +18,15 @@ const io = new Server(server, {
 const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'jhany',
+  password: '081806',
   database: 'capitan_burger',
   waitForConnections: true,
   connectionLimit: 10
 });
 
 db.getConnection()
-  .then(() => console.log('🗄️  MySQL conectado'))
-  .catch(err => console.error('❌ Error MySQL:', err.message));
+  .then(() => console.log('MySQL conectado'))
+  .catch(err => console.error('Error MySQL:', err.message));
 
 
 let contador = 0;
@@ -68,15 +68,15 @@ async function cargarPedidosActivos() {
     } else {
       contador = 1;
     }
-    console.log(`📋 ${pedidos.length} pedidos activos con sus ítems cargados desde MySQL`);
+    console.log(`${pedidos.length} pedidos activos con sus ítems cargados desde MySQL`);
   } catch (err) {
-    console.error('❌ Error cargando pedidos al iniciar:', err.message);
+    console.error('Error cargando pedidos al iniciar:', err.message);
   }
 }
 
 
 io.on('connection', (socket) => {
-  console.log('🟢 Cliente conectado');
+  console.log('Cliente conectado');
 
   socket.emit('pedidosActualizados', pedidos);
 
@@ -112,10 +112,10 @@ io.on('connection', (socket) => {
       }
 
       await connection.commit();
-      console.log(`✅ Pedido #${pedido.numero} y sus ítems guardados en MySQL`);
+      console.log(`Pedido #${pedido.numero} y sus ítems guardados en MySQL`);
     } catch (err) {
       await connection.rollback();
-      console.error('❌ Error guardando pedido completo en MySQL:', err.message);
+      console.error('Error guardando pedido completo en MySQL:', err.message);
     } finally {
       connection.release();
     }
@@ -139,19 +139,19 @@ io.on('connection', (socket) => {
         const ids = pedidos.map(p => p.id);
         await db.query(
           `UPDATE pedidos SET estado = 'entregado' 
-           WHERE estado != 'entregado' AND id NOT IN (?)`,
+            WHERE estado != 'entregado' AND id NOT IN (?)`,
           [ids]
         );
       } else {
         await db.query("UPDATE pedidos SET estado = 'entregado' WHERE estado != 'entregado'");
       }
     } catch (err) {
-      console.error('❌ Error actualizando estados en lote:', err.message);
+      console.error('Error actualizando estados en lote:', err.message);
     }
   });
 
   socket.on('disconnect', () => {
-    console.log('🔴 Cliente desconectado');
+    console.log('Cliente desconectado');
   });
 });
 
@@ -172,11 +172,11 @@ app.get('/historial', async (req, res) => {
                   'observacion', pi.observacion
                 )
               ) as items
-       FROM pedidos p
-       LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
-       GROUP BY p.id
-       ORDER BY p.creado_en DESC
-       LIMIT 100`
+        FROM pedidos p
+        LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
+        GROUP BY p.id
+        ORDER BY p.creado_en DESC
+        LIMIT 100`
     );
 
     const resultado = rows.map((p) => ({
@@ -202,10 +202,10 @@ app.get('/ventas-por-mes', async (req, res) => {
         SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
-       FROM pedidos
-       WHERE estado = 'entregado'
-       GROUP BY DATE_FORMAT(creado_en, '%Y-%m')
-       ORDER BY mes DESC`
+        FROM pedidos
+        WHERE estado = 'entregado'
+        GROUP BY DATE_FORMAT(creado_en, '%Y-%m')
+        ORDER BY mes DESC`
     );
     res.json(rows);
   } catch (err) {
@@ -225,11 +225,11 @@ app.get('/ventas-por-dia', async (req, res) => {
         SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
-       FROM pedidos
-       WHERE estado = 'entregado'
-       AND creado_en >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-       GROUP BY DATE(creado_en)
-       ORDER BY dia DESC`
+        FROM pedidos
+        WHERE estado = 'entregado'
+        AND creado_en >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY DATE(creado_en)
+        ORDER BY dia DESC`
     );
     res.json(rows);
   } catch (err) {
@@ -249,10 +249,10 @@ app.get('/ventas-por-semana', async (req, res) => {
         SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
-       FROM pedidos
-       WHERE estado = 'entregado'
-       GROUP BY YEARWEEK(creado_en, 1)
-       ORDER BY semana DESC`
+        FROM pedidos
+        WHERE estado = 'entregado'
+        GROUP BY YEARWEEK(creado_en, 1)
+        ORDER BY semana DESC`
     );
     res.json(rows);
   } catch (err) {
@@ -274,14 +274,42 @@ app.get('/productos', async (req, res) => {
 
 // Eliminar pedido permanentemente
 app.delete('/pedidos/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = Number(req.params.id);
+  const connection = await db.getConnection();
   try {
-    await db.query('DELETE FROM pedidos WHERE id = ?', [id]);
-    pedidos = pedidos.filter(p => p.id != id);
+    await connection.beginTransaction();
+
+    const [items] = await connection.query(
+      'SELECT producto_id FROM pedido_items WHERE pedido_id = ?', [id]
+    );
+
+    for (const item of items) {
+      if (item.producto_id) {
+        await connection.query(
+          'UPDATE inventario SET stock_actual = stock_actual + 1 WHERE producto_id = ?',
+          [item.producto_id]
+        );
+        await connection.query(
+          `UPDATE ingredientes i
+            JOIN producto_ingredientes pi ON pi.ingrediente_id = i.id
+            SET i.stock_actual = i.stock_actual + pi.cantidad
+            WHERE pi.producto_id = ?`,
+          [item.producto_id]
+        );
+      }
+    }
+
+    await connection.query('DELETE FROM pedidos WHERE id = ?', [id]);
+    await connection.commit();
+
+    pedidos = pedidos.filter(p => Number(p.id) !== id);
     io.emit('pedidosActualizados', pedidos);
     res.json({ ok: true });
   } catch (err) {
+    await connection.rollback();
     res.status(500).json({ error: err.message });
+  } finally {
+    connection.release();
   }
 });
 
@@ -290,10 +318,10 @@ app.get('/stock', async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT p.id, p.nombre, i.stock_actual, i.stock_minimo
-       FROM productos p
-       JOIN inventario i ON i.producto_id = p.id
-       WHERE p.activo = TRUE
-       ORDER BY p.id`
+        FROM productos p
+        JOIN inventario i ON i.producto_id = p.id
+        WHERE p.activo = TRUE
+        ORDER BY p.id`
     );
     res.json(rows);
   } catch (err) {
@@ -304,7 +332,7 @@ app.get('/stock', async (req, res) => {
 async function iniciar() {
   await cargarPedidosActivos();
   server.listen(3000, () => {
-    console.log('🚀 Servidor corriendo en http://localhost:3000');
+    console.log('Servidor corriendo en http://localhost:3000');
   });
 }
 

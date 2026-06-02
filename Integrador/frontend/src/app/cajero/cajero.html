@@ -12,26 +12,24 @@
                     <strong>{{ item.nombre }}</strong>
                     <p>{{ item.tamano }}</p>
                     <small *ngIf="item.extras?.length">
-                        Extras:
-                        {{ item.extras?.join(', ') }}
+                        Extras: {{ item.extras?.join(', ') }}
                     </small>
                     <br>
                     <small *ngIf="item.observacion">
-                        Obs:
-                        {{ item.observacion }}
+                        Obs: {{ item.observacion }}
                     </small>
                 </div>
                 <div class="derecha-item">
                     <p>S/ {{ item.precio }}</p>
-                    <button class="eliminar" (click)="eliminar(i)">
-                        ✕
-                    </button>
+                    <button class="eliminar" (click)="eliminar(i)">✕</button>
                 </div>
             </div>
         </div>
         <div class="footer">
             <h2>Total: S/ {{ total }}</h2>
-            <button class="cancelar-pedido" (click)="cancelarUltimoPedido()">
+            <button class="cancelar-pedido"
+                [disabled]="!ultimoPedidoId"
+                (click)="cancelarUltimoPedido()">
                 ✕ Cancelar Último Pedido
             </button>
             <button class="confirmar" (click)="abrirPago()">
@@ -39,7 +37,8 @@
             </button>
         </div>
     </div>
-  <div class="panel">
+
+    <div class="panel">
         <div class="categorias">
             <button *ngFor="let c of categorias"
                 [style.background]="c.color"
@@ -55,16 +54,17 @@
                 <h3>{{ p.nombre }}</h3>
                 <span>S/ {{ p.precio }}</span>
                 <small [style.color]="
-                    stockMap[p.producto_id] === undefined ? 'gray' :
+                    !stockCargado ? 'gray' :
                     stockMap[p.producto_id] === 0 ? 'red' :
                     stockMap[p.producto_id] <= 5 ? 'orange' : 'green'">
-                    Stock: {{ stockMap[p.producto_id] }}
+                    Stock: {{ stockCargado ? stockMap[p.producto_id] : '...' }}
                 </small>
             </button>
         </div>
     </div>
 </div>
 
+<!-- MODAL PRODUCTO -->
 <div class="modal-overlay" *ngIf="mostrarModal">
     <div class="modal-box">
         <h2>{{ productoSeleccionado?.nombre }}</h2>
@@ -76,17 +76,24 @@
                     [class.activo]="tamanoSeleccionado === t"
                     (click)="seleccionarTamano(t)">
                     {{ t }}
+                    <small *ngIf="t === 'Mediana'" class="precio-hint">+S/3</small>
+                    <small *ngIf="t === 'Grande'"  class="precio-hint">+S/6</small>
                 </button>
             </div>
         </div>
         <ng-container *ngIf="!esBebidaOComplemento()">
             <div class="extras-box">
-                <h3>Ingredientes Extra</h3>
+                <h3>Ingredientes Extra <small class="precio-hint">(+S/2 c/u)</small></h3>
                 <div class="extras">
                     <button *ngFor="let extra of ingredientesExtra"
-                        (click)="toggleExtra(extra)"
-                        [class.activo]="extrasSeleccionados.includes(extra)">
+                        (click)="tieneStockExtra(extra) && toggleExtra(extra)"
+                        [class.activo]="extrasSeleccionados.includes(extra)"
+                        [class.stock-bajo]="esStockBajoExtra(extra)"
+                        [disabled]="!tieneStockExtra(extra)"
+                        [title]="!tieneStockExtra(extra) ? 'Sin stock' : esStockBajoExtra(extra) ? 'Stock bajo' : ''">
                         {{ extra }}
+                        <small *ngIf="!tieneStockExtra(extra)" style="color:red; display:block; font-size:10px;">Sin stock</small>
+                        <small *ngIf="esStockBajoExtra(extra)" style="color:orange; display:block; font-size:10px;">Stock bajo</small>
                     </button>
                 </div>
             </div>
@@ -106,35 +113,30 @@
     </div>
 </div>
 
-
+<!-- MODAL PAGO -->
 <div class="modal-overlay" *ngIf="mostrarPago">
     <div class="modal-box modal-pago">
         <h2>Confirmar Pago</h2>
-        <p class="precio-modal">
-            Total a pagar: S/ {{ total }}
-        </p>
+        <p class="precio-modal">Total a pagar: S/ {{ total }}</p>
         <div class="extras-box">
             <h3>Método de Pago</h3>
             <div class="extras">
-                <button [class.activo]="metodoPago === 'Efectivo'" (click)="metodoPago = 'Efectivo'">
-                    Efectivo
-                </button>
-
-                <button [class.activo]="metodoPago === 'Tarjeta'" (click)="metodoPago = 'Tarjeta'">
-                    Tarjeta
-                </button>
-                <button [class.activo]="metodoPago === 'Yape'" (click)="metodoPago = 'Yape'">
-                    Yape
-                </button>
+                <button [class.activo]="metodoPago === 'Efectivo'" (click)="metodoPago = 'Efectivo'">Efectivo</button>
+                <button [class.activo]="metodoPago === 'Tarjeta'"  (click)="metodoPago = 'Tarjeta'">Tarjeta</button>
+                <button [class.activo]="metodoPago === 'Yape'"     (click)="metodoPago = 'Yape'">Yape</button>
             </div>
         </div>
         <div class="acciones-modal">
-            <button class="cancelar" (click)="mostrarPago = false">
-                Cancelar
-            </button>
-            <button class="agregar-btn" (click)="procesarPago()">
-                Confirmar Pago
-            </button>
+            <button class="cancelar" (click)="mostrarPago = false">Cancelar</button>
+            <button class="agregar-btn" (click)="procesarPago()">Confirmar Pago</button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN — fuera de todos los otros modales -->
+<div class="modal-overlay" *ngIf="mostrarConfirmacion">
+    <div class="modal-confirmacion">
+        <div class="check-icon">✓</div>
+        <p class="confirmacion-titulo">{{ mensajeConfirmacion }}</p>
     </div>
 </div>

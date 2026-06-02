@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SocketService } from './socket';
+
 export interface PedidoItem {
   producto_id: number;
   nombre: string;
@@ -37,10 +38,11 @@ export class PedidoService {
     });
   }
 
-  agregarPedido(items: PedidoItem[], pago: 'Efectivo' | 'Tarjeta' | 'Yape', total: number, id?: number) {
+  agregarPedido(items: PedidoItem[], pago: 'Efectivo' | 'Tarjeta' | 'Yape', total: number): number {
     this.contador++;
+    const nuevoId = Date.now();
     const nuevo: Pedido = {
-      id: id || Date.now(),
+      id: nuevoId,
       numero: this.contador,
       items,
       estado: 'pendiente',
@@ -48,6 +50,7 @@ export class PedidoService {
       total
     };
     this.socket.enviarPedido(nuevo);
+    return nuevoId; // ← devuelve el id real
   }
 
   actualizarPedidos(pedidos: Pedido[]) {

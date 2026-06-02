@@ -1,5 +1,4 @@
-
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
 import { SocketService } from '../socket';
@@ -12,7 +11,9 @@ import { Subscription } from 'rxjs';
   templateUrl: './admin.html',
   styleUrls: ['./admin.css']
 })
-export class Admin {
+export class Admin implements OnInit, OnDestroy {
+  private sub!: Subscription;
+
   constructor(
     public auth: AuthService,
     private socket: SocketService,
@@ -20,24 +21,32 @@ export class Admin {
   ) {}
 
   historialPedidos: any[] = [];
-  ventasPorMes: any[] = [];
-  ventasPorDia: any[] = [];
-  ventasPorSemana: any[] = [];
-  vistaSeleccionada: 'dia' | 'semana' | 'mes' = 'mes';
+  ventasPorMes: any[]     = [];
+  ventasPorDia: any[]     = [];
+  ventasPorSemana: any[]  = [];
+  stockProductos: any[]   = [];
+  stockIngredientes: any[] = [];
+  vistaActual: string     = 'historial';
+  vistaVentas: string     = 'dia';
+  mesExpandido: string | null = null; // para expandir/colapsar meses
 
   ngOnInit() {
+    this.cargarTodo();
+    this.sub = this.socket.escucharPedidos().subscribe(() => {
+      this.cargarTodo();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.sub) this.sub.unsubscribe();
+  }
+
+  cargarTodo() {
     this.cargarHistorial();
     this.cargarVentasPorMes();
     this.cargarVentasPorDia();
     this.cargarVentasPorSemana();
-
-    this.socket.escucharPedidos().subscribe(() => {
-      this.cargarHistorial();
-      this.cargarVentasPorMes();
-      this.cargarVentasPorDia();
-      this.cargarVentasPorSemana();
-      this.cdr.detectChanges();
-    });
+    this.cargarStock();
   }
 
   cargarHistorial() {
@@ -76,37 +85,59 @@ export class Admin {
       });
   }
 
-  get totalVentas() {
-    return this.historialPedidos.reduce(
-      (totalGeneral, pedido) => {
-        const totalPedido = pedido.items?.reduce(
-          (sum: number, item: any) => sum + item.precio, 0
-        ) || 0;
-        return totalGeneral + totalPedido;
-      }, 0
-    );
+  cargarStock() {
+    fetch('http://localhost:3000/stock-admin')
+      .then(res => res.json())
+      .then((data: any) => {
+        this.stockProductos   = data.productos;
+        this.stockIngredientes = data.ingredientes;
+        this.cdr.detectChanges();
+      });
+  }
+
+  // Total dinámico según la vista activa
+  get totalPedidosMostrados(): number {
+    if (this.vistaActual === 'dia')    return this.ventasPorDia.reduce((s, d) => s + Number(d.total_pedidos), 0);
+    if (this.vistaActual === 'semana') return this.ventasPorSemana.reduce((s, d) => s + Number(d.total_pedidos), 0);
+    if (this.vistaActual === 'mes')    return this.ventasPorMes.reduce((s, d) => s + Number(d.total_pedidos), 0);
+    return this.historialPedidos.length;
+  }
+
+  get totalVentasMostradas(): number {
+    if (this.vistaActual === 'dia')    return this.ventasPorDia.reduce((s, d) => s + Number(d.total_ventas), 0);
+    if (this.vistaActual === 'semana') return this.ventasPorSemana.reduce((s, d) => s + Number(d.total_ventas), 0);
+    if (this.vistaActual === 'mes')    return this.ventasPorMes.reduce((s, d) => s + Number(d.total_ventas), 0);
+    return this.historialPedidos.reduce((s, p) => s + (p.total || 0), 0);
+  }
+
+  toggleMes(mesKey: string) {
+    this.mesExpandido = this.mesExpandido === mesKey ? null : mesKey;
+  }
+
+  pedidosDelMes(mesKey: string): any[] {
+    return this.historialPedidos.filter(p => {
+      const fecha = new Date(p.creado_en);
+      const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      return key === mesKey;
+    });
   }
 
   getTotalPedido(pedido: any): number {
-    if (!pedido.items) return 0;
-    return pedido.items.reduce(
-      (sum: number, item: any) => sum + item.precio, 0
-    );
+    return pedido.total || pedido.items?.reduce((s: number, i: any) => s + i.precio, 0) || 0;
   }
 
   cancelarPedido(id: number) {
     const confirmar = confirm('¿Eliminar este pedido permanentemente?');
     if (!confirmar) return;
-
     fetch(`http://localhost:3000/pedidos/${id}`, { method: 'DELETE' })
       .then(() => {
-        this.cargarHistorial();
+        this.historialPedidos = this.historialPedidos.filter(p => p.id !== id);
         this.cargarVentasPorMes();
         this.cargarVentasPorDia();
         this.cargarVentasPorSemana();
         this.cdr.detectChanges();
       })
-      .catch(err => console.error('Error al cancelar pedido:', err));
+      .catch(err => console.error('Error:', err));
   }
 
   logout() {
