@@ -365,3 +365,53 @@ body{
 .stock-agotado { border-color: #c0392b; }
 .stock-bajo    { border-color: orange; }
 .stock-ok      { border-color: #27ae60; }
+
+.pedido-mini-items {
+    margin-top: 8px;
+    padding-left: 10px;
+    border-left: 3px solid #e8d3ad;
+}
+
+.mini-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 14px;
+    color: #4b250f;
+    border-bottom: 1px dashed #f0dfc2;
+}
+
+.mini-item:last-child {
+    border-bottom: none;
+}
+
+.mini-precio {
+    margin-left: auto;
+    font-weight: bold;
+    color: #5b2d0f;
+}
+
+.mes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px; 
+    padding: 15px 20px;
+    flex-wrap: wrap;
+}
+
+.mes-header h3 {
+    font-size: 20px;
+    color: #4b250f;
+    margin: 0;
+    flex: 1; 
+}
+
+.total-mes {
+    font-size: 20px;
+    font-weight: bold;
+    color: #5b2d0f;
+    margin-left: auto;
+    padding-right: 15px;
+}

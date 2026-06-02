@@ -190,22 +190,22 @@ app.get('/historial', async (req, res) => {
   }
 });
 
-// Ventas por mes
-app.get('/ventas-por-mes', async (req, res) => {
+app.get('/ventas-por-dia', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
-        DATE_FORMAT(creado_en, '%Y-%m') as mes,
-        DATE_FORMAT(creado_en, '%M %Y') as mes_nombre,
+      `SELECT
+        DATE(creado_en) as dia,
+        DATE_FORMAT(MIN(creado_en), '%d/%m/%Y') as dia_nombre,
         COUNT(*) as total_pedidos,
         SUM(total) as total_ventas,
         SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
         FROM pedidos
-        WHERE estado = 'entregado'
-        GROUP BY DATE_FORMAT(creado_en, '%Y-%m')
-        ORDER BY mes DESC`
+        WHERE estado != 'cancelado'
+        GROUP BY DATE(creado_en)
+        ORDER BY dia DESC
+        LIMIT 30`
     );
     res.json(rows);
   } catch (err) {
@@ -213,23 +213,21 @@ app.get('/ventas-por-mes', async (req, res) => {
   }
 });
 
-// Ventas por día (últimos 30 días)
-app.get('/ventas-por-dia', async (req, res) => {
+app.get('/ventas-por-mes', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
-        DATE(creado_en) as dia,
-        DATE_FORMAT(creado_en, '%d/%m/%Y') as dia_nombre,
+      `SELECT
+        DATE_FORMAT(MIN(creado_en), '%Y-%m') as mes,
+        DATE_FORMAT(MIN(creado_en), '%M %Y') as mes_nombre,
         COUNT(*) as total_pedidos,
         SUM(total) as total_ventas,
         SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
         FROM pedidos
-        WHERE estado = 'entregado'
-        AND creado_en >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY DATE(creado_en)
-        ORDER BY dia DESC`
+        WHERE estado != 'cancelado'
+        GROUP BY DATE_FORMAT(creado_en, '%Y-%m')
+        ORDER BY mes DESC`
     );
     res.json(rows);
   } catch (err) {
@@ -241,18 +239,20 @@ app.get('/ventas-por-dia', async (req, res) => {
 app.get('/ventas-por-semana', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
-        YEARWEEK(creado_en, 1) as semana,
-        DATE_FORMAT(MIN(creado_en), 'Semana del %d/%m/%Y') as semana_nombre,
+      `SELECT
+        YEARWEEK(MIN(creado_en), 1) as semana_key,
+        DATE_FORMAT(MIN(creado_en), '%d/%m/%Y') as desde,
+        DATE_FORMAT(MAX(creado_en), '%d/%m/%Y') as hasta,
         COUNT(*) as total_pedidos,
         SUM(total) as total_ventas,
         SUM(CASE WHEN pago = 'Efectivo' THEN 1 ELSE 0 END) as efectivo,
         SUM(CASE WHEN pago = 'Tarjeta'  THEN 1 ELSE 0 END) as tarjeta,
         SUM(CASE WHEN pago = 'Yape'     THEN 1 ELSE 0 END) as yape
         FROM pedidos
-        WHERE estado = 'entregado'
+        WHERE estado != 'cancelado'
         GROUP BY YEARWEEK(creado_en, 1)
-        ORDER BY semana DESC`
+        ORDER BY semana_key DESC
+        LIMIT 12`
     );
     res.json(rows);
   } catch (err) {

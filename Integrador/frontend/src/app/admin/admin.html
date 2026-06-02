@@ -60,15 +60,37 @@
         <!-- VISTA: POR DÍA -->
         <ng-container *ngIf="vistaActual === 'dia'">
             <div class="tabla-mes" *ngFor="let d of ventasPorDia">
-                <div class="mes-header">
-                    <h3>{{ d.dia_nombre }}</h3>
-                    <span class="total-mes">S/ {{ d.total_ventas | number:'1.2-2' }}</span>
+                <div class="mes-header mes-clickeable" (click)="toggleMes(d.dia)">
+                    <h3 style="font-size:20px;">{{ d.dia_nombre }}</h3>
+                    <span class="total-mes" style="font-size:20px;">S/ {{ d.total_ventas | number:'1.2-2' }}</span>
+                    <span class="expand-icon">{{ mesExpandido === d.dia ? '▲' : '▼' }}</span>
                 </div>
-                <div class="mes-detalle">
+                <div class="mes-detalle" style="font-size:15px;">
                     <span>Pedidos: <strong>{{ d.total_pedidos }}</strong></span>
                     <span class="pago-efectivo">Efectivo: <strong>{{ d.efectivo }}</strong></span>
                     <span class="pago-tarjeta">Tarjeta: <strong>{{ d.tarjeta }}</strong></span>
                     <span class="pago-yape">Yape: <strong>{{ d.yape }}</strong></span>
+                </div>
+                <div class="pedidos-del-mes" *ngIf="mesExpandido === d.dia">
+                    <div class="pedido-mini" *ngFor="let pedido of pedidosDelDia(d.dia)">
+                        <div class="pedido-mini-header">
+                            <span style="font-size:15px; font-weight:bold;">Ticket #{{ pedido.id.toString().slice(-4) }}</span>
+                            <small style="font-size:13px;">{{ pedido.creado_en | date:'dd/MM HH:mm' }}</small>
+                            <span class="badge-pago" [ngClass]="{
+                                'pago-efectivo': pedido.pago === 'Efectivo',
+                                'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                                'pago-yape':     pedido.pago === 'Yape'
+                            }">{{ pedido.pago }}</span>
+                            <strong style="font-size:15px;">S/ {{ getTotalPedido(pedido) }}</strong>
+                        </div>
+                        <div class="pedido-mini-items">
+                            <div *ngFor="let item of pedido.items" class="mini-item">
+                                <span>• {{ item.nombre }}</span>
+                                <small *ngIf="item.extras?.length"> — Extras: {{ item.extras.join(', ') }}</small>
+                                <span class="mini-precio">S/ {{ item.precio }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </ng-container>
@@ -76,46 +98,76 @@
         <!-- VISTA: POR SEMANA -->
         <ng-container *ngIf="vistaActual === 'semana'">
             <div class="tabla-mes" *ngFor="let s of ventasPorSemana">
-                <div class="mes-header">
-                    <h3>{{ s.desde }} — {{ s.hasta }}</h3>
-                    <span class="total-mes">S/ {{ s.total_ventas | number:'1.2-2' }}</span>
+                <div class="mes-header mes-clickeable" (click)="toggleMes(s.semana_key)">
+                    <h3 style="font-size:20px;">{{ s.desde }} — {{ s.hasta }}</h3>
+                    <span class="total-mes" style="font-size:20px;">S/ {{ s.total_ventas | number:'1.2-2' }}</span>
+                    <span class="expand-icon">{{ mesExpandido === s.semana_key ? '▲' : '▼' }}</span>
                 </div>
-                <div class="mes-detalle">
+                <div class="mes-detalle" style="font-size:15px;">
                     <span>Pedidos: <strong>{{ s.total_pedidos }}</strong></span>
                     <span class="pago-efectivo">Efectivo: <strong>{{ s.efectivo }}</strong></span>
                     <span class="pago-tarjeta">Tarjeta: <strong>{{ s.tarjeta }}</strong></span>
                     <span class="pago-yape">Yape: <strong>{{ s.yape }}</strong></span>
                 </div>
-            </div>
-        </ng-container>
-
-        <!-- VISTA: POR MES — expandible con lista de pedidos -->
-        <ng-container *ngIf="vistaActual === 'mes'">
-            <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
-                <!-- Cabecera clickeable para expandir -->
-                <div class="mes-header mes-clickeable" (click)="toggleMes(mes.mes)">
-                    <h3>{{ mes.mes_nombre }}</h3>
-                    <span class="total-mes">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
-                    <span class="expand-icon">{{ mesExpandido === mes.mes ? '▲' : '▼' }}</span>
-                </div>
-                <div class="mes-detalle">
-                    <span>Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
-                    <span class="pago-efectivo">Efectivo: <strong>{{ mes.efectivo }}</strong></span>
-                    <span class="pago-tarjeta">Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
-                    <span class="pago-yape">Yape: <strong>{{ mes.yape }}</strong></span>
-                </div>
-                <!-- Lista de pedidos del mes expandida -->
-                <div class="pedidos-del-mes" *ngIf="mesExpandido === mes.mes">
-                    <div class="pedido-mini" *ngFor="let pedido of pedidosDelMes(mes.mes)">
+                <!-- Pedidos expandidos con detalle -->
+                <div class="pedidos-del-mes" *ngIf="mesExpandido === s.semana_key">
+                    <div class="pedido-mini" *ngFor="let pedido of pedidosDeLaSemana(s.semana_key)">
                         <div class="pedido-mini-header">
-                            <span>Ticket #{{ pedido.id.toString().slice(-4) }}</span>
-                            <small>{{ pedido.creado_en | date:'dd/MM HH:mm' }}</small>
+                            <span style="font-size:15px; font-weight:bold;">Ticket #{{ pedido.id.toString().slice(-4) }}</span>
+                            <small style="font-size:13px;">{{ pedido.creado_en | date:'dd/MM HH:mm' }}</small>
                             <span class="badge-pago" [ngClass]="{
                                 'pago-efectivo': pedido.pago === 'Efectivo',
                                 'pago-tarjeta':  pedido.pago === 'Tarjeta',
                                 'pago-yape':     pedido.pago === 'Yape'
                             }">{{ pedido.pago }}</span>
-                            <strong>S/ {{ getTotalPedido(pedido) }}</strong>
+                            <strong style="font-size:15px;">S/ {{ getTotalPedido(pedido) }}</strong>
+                        </div>
+                        <div class="pedido-mini-items">
+                            <div *ngFor="let item of pedido.items" class="mini-item">
+                                <span>• {{ item.nombre }}</span>
+                                <small *ngIf="item.extras?.length"> — Extras: {{ item.extras.join(', ') }}</small>
+                                <span class="mini-precio">S/ {{ item.precio }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- VISTA: POR MES -->
+        <ng-container *ngIf="vistaActual === 'mes'">
+            <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
+                <div class="mes-header mes-clickeable" (click)="toggleMes(mes.mes)">
+                    <h3 style="font-size:20px;">{{ mes.mes_nombre }}</h3>
+                    <span class="total-mes" style="font-size:20px;">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
+                    <span class="expand-icon">{{ mesExpandido === mes.mes ? '▲' : '▼' }}</span>
+                </div>
+                <div class="mes-detalle" style="font-size:15px;">
+                    <span>Pedidos: <strong>{{ mes.total_pedidos }}</strong></span>
+                    <span class="pago-efectivo">Efectivo: <strong>{{ mes.efectivo }}</strong></span>
+                    <span class="pago-tarjeta">Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
+                    <span class="pago-yape">Yape: <strong>{{ mes.yape }}</strong></span>
+                </div>
+                <!-- Pedidos expandidos con detalle de productos -->
+                <div class="pedidos-del-mes" *ngIf="mesExpandido === mes.mes">
+                    <div class="pedido-mini" *ngFor="let pedido of pedidosDelMes(mes.mes)">
+                        <div class="pedido-mini-header">
+                            <span style="font-size:15px; font-weight:bold;">Ticket #{{ pedido.id.toString().slice(-4) }}</span>
+                            <small style="font-size:13px;">{{ pedido.creado_en | date:'dd/MM HH:mm' }}</small>
+                            <span class="badge-pago" [ngClass]="{
+                                'pago-efectivo': pedido.pago === 'Efectivo',
+                                'pago-tarjeta':  pedido.pago === 'Tarjeta',
+                                'pago-yape':     pedido.pago === 'Yape'
+                            }">{{ pedido.pago }}</span>
+                            <strong style="font-size:15px;">S/ {{ getTotalPedido(pedido) }}</strong>
+                        </div>
+                        <!-- Detalle de productos del pedido -->
+                        <div class="pedido-mini-items">
+                            <div *ngFor="let item of pedido.items" class="mini-item">
+                                <span>• {{ item.nombre }}</span>
+                                <small *ngIf="item.extras?.length"> — Extras: {{ item.extras.join(', ') }}</small>
+                                <span class="mini-precio">S/ {{ item.precio }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

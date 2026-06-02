@@ -208,6 +208,8 @@ export class Cajero implements OnInit {
     this.mostrarPago = true;
   }
 
+  
+
   procesarPago() {
     if (this.carrito.length === 0) return;
 

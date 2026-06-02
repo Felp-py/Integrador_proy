@@ -28,7 +28,7 @@ export class Admin implements OnInit, OnDestroy {
   stockIngredientes: any[] = [];
   vistaActual: string     = 'historial';
   vistaVentas: string     = 'dia';
-  mesExpandido: string | null = null; // para expandir/colapsar meses
+  mesExpandido: string | null = null; 
 
   ngOnInit() {
     this.cargarTodo();
@@ -58,20 +58,20 @@ export class Admin implements OnInit, OnDestroy {
       });
   }
 
-  cargarVentasPorMes() {
-    fetch('http://localhost:3000/ventas-por-mes')
+  cargarVentasPorDia() {
+    fetch('http://localhost:3000/ventas-por-dia')
       .then(res => res.json())
-      .then((data: any[]) => {
-        this.ventasPorMes = data;
+      .then((data: any) => {
+        this.ventasPorDia = Array.isArray(data) ? data : []; 
         this.cdr.detectChanges();
       });
   }
 
-  cargarVentasPorDia() {
-    fetch('http://localhost:3000/ventas-por-dia')
+  cargarVentasPorMes() {
+    fetch('http://localhost:3000/ventas-por-mes')
       .then(res => res.json())
-      .then((data: any[]) => {
-        this.ventasPorDia = data;
+      .then((data: any) => {
+        this.ventasPorMes = Array.isArray(data) ? data : []; 
         this.cdr.detectChanges();
       });
   }
@@ -79,8 +79,8 @@ export class Admin implements OnInit, OnDestroy {
   cargarVentasPorSemana() {
     fetch('http://localhost:3000/ventas-por-semana')
       .then(res => res.json())
-      .then((data: any[]) => {
-        this.ventasPorSemana = data;
+      .then((data: any) => {
+        this.ventasPorSemana = Array.isArray(data) ? data : []; 
         this.cdr.detectChanges();
       });
   }
@@ -97,16 +97,16 @@ export class Admin implements OnInit, OnDestroy {
 
   // Total dinámico según la vista activa
   get totalPedidosMostrados(): number {
-    if (this.vistaActual === 'dia')    return this.ventasPorDia.reduce((s, d) => s + Number(d.total_pedidos), 0);
-    if (this.vistaActual === 'semana') return this.ventasPorSemana.reduce((s, d) => s + Number(d.total_pedidos), 0);
-    if (this.vistaActual === 'mes')    return this.ventasPorMes.reduce((s, d) => s + Number(d.total_pedidos), 0);
+    if (this.vistaActual === 'dia')    return (this.ventasPorDia || []).reduce((s, d) => s + Number(d.total_pedidos), 0);
+    if (this.vistaActual === 'semana') return (this.ventasPorSemana || []).reduce((s, d) => s + Number(d.total_pedidos), 0);
+    if (this.vistaActual === 'mes')    return (this.ventasPorMes || []).reduce((s, d) => s + Number(d.total_pedidos), 0);
     return this.historialPedidos.length;
   }
 
   get totalVentasMostradas(): number {
-    if (this.vistaActual === 'dia')    return this.ventasPorDia.reduce((s, d) => s + Number(d.total_ventas), 0);
-    if (this.vistaActual === 'semana') return this.ventasPorSemana.reduce((s, d) => s + Number(d.total_ventas), 0);
-    if (this.vistaActual === 'mes')    return this.ventasPorMes.reduce((s, d) => s + Number(d.total_ventas), 0);
+    if (this.vistaActual === 'dia')    return (this.ventasPorDia || []).reduce((s, d) => s + Number(d.total_ventas), 0);
+    if (this.vistaActual === 'semana') return (this.ventasPorSemana || []).reduce((s, d) => s + Number(d.total_ventas), 0);
+    if (this.vistaActual === 'mes')    return (this.ventasPorMes || []).reduce((s, d) => s + Number(d.total_ventas), 0);
     return this.historialPedidos.reduce((s, p) => s + (p.total || 0), 0);
   }
 
@@ -119,6 +119,28 @@ export class Admin implements OnInit, OnDestroy {
       const fecha = new Date(p.creado_en);
       const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
       return key === mesKey;
+    });
+  }
+
+  pedidosDeLaSemana(semanaKey: string): any[] {
+    return this.historialPedidos.filter(p => {
+      const fecha = new Date(p.creado_en);
+      const año = fecha.getFullYear();
+      const inicio = new Date(año, 0, 1);
+      const dias = Math.floor((fecha.getTime() - inicio.getTime()) / 86400000);
+      const diaSemana = inicio.getDay() || 7;
+      const semana = Math.ceil((dias + diaSemana) / 7);
+      const key = `${año}${String(semana).padStart(2, '0')}`;
+      return key === String(semanaKey);
+    });
+  }
+
+  pedidosDelDia(dia: string): any[] {
+    const diaCorto = dia.toString().slice(0, 10); 
+    return this.historialPedidos.filter(p => {
+      const fecha = new Date(p.creado_en);
+      const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+      return key === diaCorto;
     });
   }
 
