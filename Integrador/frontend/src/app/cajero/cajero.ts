@@ -211,13 +211,14 @@ export class Cajero implements OnInit {
   procesarPago() {
     if (this.carrito.length === 0) return;
 
-    // ← captura el id real devuelto por el servicio
     const idGenerado = this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
       this.total
     );
-    this.ultimoPedidoId = idGenerado ?? null;
+    console.log('ID generado:', idGenerado);
+    this.ultimoPedidoId = idGenerado;
+    console.log('ultimoPedidoId:', this.ultimoPedidoId);
 
     const extrasUsados: string[] = [];
     this.carrito.forEach(item => {
@@ -235,23 +236,34 @@ export class Cajero implements OnInit {
     }
 
     this.carrito = [];
-    this.mostrarPago = false;
+    this.mostrarPago = false; // ← cierra modal pago primero
 
     setTimeout(() => {
       this.cargarStock();
       this.cargarStockIngredientes();
     }, 500);
 
-    this.mensajeConfirmacion = 'Pago realizado correctamente\ny enviado a cocina';
-    this.mostrarConfirmacion = true;
-    setTimeout(() => this.mostrarConfirmacion = false, 2500);
+    // ← espera a que el modal de pago cierre antes de mostrar confirmación
+    setTimeout(() => {
+      this.mensajeConfirmacion = 'Pago realizado correctamente\ny enviado a cocina';
+      this.mostrarConfirmacion = true;
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.mostrarConfirmacion = false;
+        this.cdr.detectChanges();
+      }, 2500);
+    }, 100);
   }
 
   cancelarUltimoPedido() {
     if (!this.ultimoPedidoId) {
       this.mensajeConfirmacion = 'No hay pedido reciente\npara cancelar.';
       this.mostrarConfirmacion = true;
-      setTimeout(() => this.mostrarConfirmacion = false, 2500);
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.mostrarConfirmacion = false;
+        this.cdr.detectChanges();
+      }, 2500);
       return;
     }
 
@@ -261,14 +273,21 @@ export class Cajero implements OnInit {
     fetch(`http://localhost:3000/pedidos/${this.ultimoPedidoId}`, { method: 'DELETE' })
       .then(() => {
         this.ultimoPedidoId = null;
+
         setTimeout(() => {
           this.cargarStock();
           this.cargarStockIngredientes();
         }, 500);
+
+        // ← un solo bloque, sin anidar setTimeout
         this.mensajeConfirmacion = 'Pedido cancelado.\nEl stock fue recuperado.';
         this.mostrarConfirmacion = true;
-        setTimeout(() => this.mostrarConfirmacion = false, 2500);
         this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.mostrarConfirmacion = false;
+          this.cdr.detectChanges();
+        }, 2500);
       })
       .catch(err => console.error('Error al cancelar:', err));
   }

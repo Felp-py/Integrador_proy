@@ -133,10 +133,13 @@
     </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN — fuera de todos los otros modales -->
+<!-- MODAL CONFIRMACIÓN -->
 <div class="modal-overlay" *ngIf="mostrarConfirmacion">
     <div class="modal-confirmacion">
-        <div class="check-icon">✓</div>
-        <p class="confirmacion-titulo">{{ mensajeConfirmacion }}</p>
+        <h2 class="confirmacion-header">COMPRA CONFIRMADA</h2>
+        <div class="confirmacion-body">
+            <div class="check-icon">✓</div>
+            <p class="confirmacion-titulo">{{ mensajeConfirmacion }}</p>
+        </div>
     </div>
 </div>

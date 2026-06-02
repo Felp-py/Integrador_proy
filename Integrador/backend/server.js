@@ -329,6 +329,55 @@ app.get('/stock', async (req, res) => {
   }
 });
 
+// Stock completo para admin
+app.get('/stock-admin', async (req, res) => {
+  try {
+    const [productos] = await db.query(
+      `SELECT p.id, p.nombre, p.categoria,
+        i.stock_actual, i.stock_minimo, i.stock_maximo
+        FROM productos p
+        JOIN inventario i ON i.producto_id = p.id
+        WHERE p.activo = TRUE
+        ORDER BY p.categoria, p.nombre`
+    );
+    const [ingredientes] = await db.query(
+      `SELECT id, nombre, stock_actual, stock_minimo
+        FROM ingredientes ORDER BY nombre`
+    );
+    res.json({ productos, ingredientes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Descontar ingredientes extras al pagar
+app.post('/stock-ingredientes/descontar', async (req, res) => {
+  const { nombres } = req.body;
+  if (!nombres || nombres.length === 0) return res.json({ ok: true });
+  try {
+    for (const nombre of nombres) {
+      const base = nombre.replace(' extra', '').trim();
+      await db.query(
+        'UPDATE ingredientes SET stock_actual = stock_actual - 1 WHERE nombre = ? AND stock_actual > 0',
+        [base]
+      );
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Stock de ingredientes (para cajero)
+app.get('/stock-ingredientes', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM ingredientes ORDER BY nombre');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 async function iniciar() {
   await cargarPedidosActivos();
   server.listen(3000, () => {
