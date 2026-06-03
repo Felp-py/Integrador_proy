@@ -213,14 +213,30 @@ export class Cajero implements OnInit {
   procesarPago() {
     if (this.carrito.length === 0) return;
 
+    // ← bloquear si hay 20 o más pedidos activos
+    fetch('http://localhost:3000/pedidos-activos-count')
+      .then(res => res.json())
+      .then((data: any) => {
+        if (data.count >= 20) {
+          this.mensajeConfirmacion = 'Cocina llena.\nEspera a que se liberen pedidos.';
+          this.mostrarConfirmacion = true;
+          setTimeout(() => {
+            this.mostrarConfirmacion = false;
+            this.cdr.detectChanges();
+          }, 3000);
+          return;
+        }
+        this.ejecutarPago();
+      });
+  }
+
+  ejecutarPago() {
     const idGenerado = this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
       this.total
     );
-    console.log('ID generado:', idGenerado);
     this.ultimoPedidoId = idGenerado;
-    console.log('ultimoPedidoId:', this.ultimoPedidoId);
 
     const extrasUsados: string[] = [];
     this.carrito.forEach(item => {
@@ -238,14 +254,13 @@ export class Cajero implements OnInit {
     }
 
     this.carrito = [];
-    this.mostrarPago = false; // ← cierra modal pago primero
+    this.mostrarPago = false;
 
     setTimeout(() => {
       this.cargarStock();
       this.cargarStockIngredientes();
     }, 500);
 
-    // ← espera a que el modal de pago cierre antes de mostrar confirmación
     setTimeout(() => {
       this.mensajeConfirmacion = 'Pago realizado correctamente\ny enviado a cocina';
       this.mostrarConfirmacion = true;

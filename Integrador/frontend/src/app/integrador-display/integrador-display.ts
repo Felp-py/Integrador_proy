@@ -20,6 +20,7 @@ export class IntegradorDisplay implements OnInit {
   pedidos: any[] = [];
   columnas: any[][] = [[], [], [], []];
   fechaActual = '';
+  pedidosVisibles: any[] = [];
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -33,6 +34,12 @@ export class IntegradorDisplay implements OnInit {
     if (key >= '0' && key <= '9') {
       const index = parseInt(key, 10);
       this.cambiarEstado(index);
+    }
+    const teclas = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+    const idx = teclas.indexOf(key);
+    if (idx !== -1) {
+      this.cambiarEstado(idx + 10);
+      return;
     }
   }
 
@@ -56,19 +63,16 @@ export class IntegradorDisplay implements OnInit {
   }
 
   actualizarColumnas() {
-    const cols: any[][] = [[], [], [], []];
-
     const pedidosVisibles = this.pedidos.filter(
       p => p.estado !== 'entregado'
     );
 
-    pedidosVisibles.forEach((pedido, index) => {
-      cols[index % 4].push({
-        ...pedido,
-        originalIndex: index
-      });
-    });
-    this.columnas = cols;
+    this.pedidosVisibles = pedidosVisibles.map((pedido, index) => ({
+      ...pedido,
+      originalIndex: index
+    }));
+    this.columnas = [this.pedidosVisibles];
+    this.cdr.detectChanges();
   }
 
   cambiarEstado(index: number) {
@@ -96,3 +100,5 @@ export class IntegradorDisplay implements OnInit {
     this.cdr.detectChanges();
   }
 }
+
+

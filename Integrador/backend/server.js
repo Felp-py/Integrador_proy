@@ -378,6 +378,17 @@ app.get('/stock-ingredientes', async (req, res) => {
   }
 });
 
+app.get('/pedidos-activos-count', async (req, res) => {
+  try {
+    const count = pedidos.filter(
+      p => p.estado !== 'entregado' && p.estado !== 'cancelado'
+    ).length;
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 async function iniciar() {
   await cargarPedidosActivos();
   server.listen(3000, () => {

@@ -5,43 +5,42 @@
 <div class="header">
   <h1>CAPITÁN BURGER - COCINA</h1>
   <p>{{ fechaActual }}</p>
+  <div class="alerta-lleno" *ngIf="pedidosVisibles.length >= 20">
+    ⚠️ Cocina llena — no se aceptan más pedidos
+  </div>
 </div>
 
 <div class="grid">
-  <div class="columna" *ngFor="let col of columnas">
-    <div class="pedido" *ngFor="let p of col" [ngClass]="p.estado">
-
-      <div class="pedido-header">
-        <span class="tecla-shortcut">{{ p.originalIndex }}</span>
-        <h2>Ticket #{{ p.id.toString().slice(-4) }}</h2>
-      </div>
-      <div class="pedido-body">
-        <div *ngFor="let item of p.items" class="ticket-item">
-          <div class="item-main">
-            <strong>• {{ item.nombre }}</strong>
-            <span class="badge-tamano">{{ item.tamano }}</span>
-          </div>
-
-          <div *ngIf="item.extras && item.extras.length" class="item-extras">
-            <small>{{ item.extras.join(', ') }}</small>
-          </div>
-
-          <div *ngIf="item.observacion" class="item-obs">
-            <small>" {{ item.observacion }} "</small>
-          </div>
+  <div class="pedido" *ngFor="let p of pedidosVisibles" [ngClass]="p.estado">
+    <div class="pedido-header">
+      <span class="tecla-shortcut">
+        {{ p.originalIndex < 10 ? p.originalIndex : ['q','w','e','r','t','y','u','i','o','p'][p.originalIndex - 10] }}
+      </span>
+      <h2>Ticket #{{ p.id.toString().slice(-4) }}</h2>
+    </div>
+    <div class="pedido-body">
+      <div *ngFor="let item of p.items" class="ticket-item">
+        <div class="item-main">
+          <strong>• {{ item.nombre }}</strong>
+          <span class="badge-tamano">{{ item.tamano }}</span>
         </div>
-
-        <p class="estado-label">Estado: <span>{{ p.estado | uppercase }}</span></p>
+        <div *ngIf="item.extras && item.extras.length" class="item-extras">
+          <small>{{ item.extras.join(', ') }}</small>
+        </div>
+        <div *ngIf="item.observacion" class="item-obs">
+          <small>" {{ item.observacion }} "</small>
+        </div>
       </div>
-      <div class="pedido-footer">
-        <button (click)="cambiarEstado(p.originalIndex)">
-          {{
+      <p class="estado-label">Estado: <span>{{ p.estado | uppercase }}</span></p>
+    </div>
+    <div class="pedido-footer">
+      <button (click)="cambiarEstado(p.originalIndex)">
+        {{
           p.estado === 'pendiente' ? 'Iniciar' :
           p.estado === 'preparacion' ? 'Listo' :
           'Entregar'
-          }}
-        </button>
-      </div>
+        }}
+      </button>
     </div>
   </div>
 </div>
