@@ -141,5 +141,10 @@
             <div class="check-icon">✓</div>
             <p class="confirmacion-titulo">{{ mensajeConfirmacion }}</p>
         </div>
+        <button class="btn-boleta"
+            *ngIf="ultimoCarritoPagado.length > 0"
+            (click)="generarBoleta()">
+            Descargar Boleta
+        </button>
     </div>
 </div>

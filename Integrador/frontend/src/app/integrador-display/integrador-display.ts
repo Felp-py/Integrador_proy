@@ -21,6 +21,7 @@ export class IntegradorDisplay implements OnInit {
   columnas: any[][] = [[], [], [], []];
   fechaActual = '';
   pedidosVisibles: any[] = [];
+  pedidosEnEspera: number = 0;
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -63,14 +64,19 @@ export class IntegradorDisplay implements OnInit {
   }
 
   actualizarColumnas() {
-    const pedidosVisibles = this.pedidos.filter(
+    const todosVisibles = this.pedidos.filter(
       p => p.estado !== 'entregado'
     );
 
-    this.pedidosVisibles = pedidosVisibles.map((pedido, index) => ({
+    const enPantalla = todosVisibles.slice(0, 20);
+    const enEspera = todosVisibles.slice(20);
+
+    this.pedidosVisibles = enPantalla.map((pedido, index) => ({
       ...pedido,
       originalIndex: index
     }));
+
+    this.pedidosEnEspera = enEspera.length;
     this.columnas = [this.pedidosVisibles];
     this.cdr.detectChanges();
   }

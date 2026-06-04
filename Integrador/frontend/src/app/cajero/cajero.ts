@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PedidoService } from '../pedido';
 import { Pedido, PedidoItem } from '../pedido';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-cajero',
@@ -35,6 +36,10 @@ export class Cajero implements OnInit {
   stockIngredientes: { [nombre: string]: number } = {}; // ← agregado
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
+  ultimoCarritoPagado: PedidoItem[] = [];
+  ultimoMetodoPago: string = '';
+  ultimoTotal: number = 0;
+  ultimoTicketId: number = 0;
 
   ngOnInit() {
     this.cargarStock();
@@ -212,31 +217,21 @@ export class Cajero implements OnInit {
 
   procesarPago() {
     if (this.carrito.length === 0) return;
-
-    // ← bloquear si hay 20 o más pedidos activos
-    fetch('http://localhost:3000/pedidos-activos-count')
-      .then(res => res.json())
-      .then((data: any) => {
-        if (data.count >= 20) {
-          this.mensajeConfirmacion = 'Cocina llena.\nEspera a que se liberen pedidos.';
-          this.mostrarConfirmacion = true;
-          setTimeout(() => {
-            this.mostrarConfirmacion = false;
-            this.cdr.detectChanges();
-          }, 3000);
-          return;
-        }
-        this.ejecutarPago();
-      });
+    this.ejecutarPago();
   }
 
   ejecutarPago() {
+    this.ultimoCarritoPagado = [...this.carrito];
+    this.ultimoMetodoPago = this.metodoPago;
+    this.ultimoTotal = this.total;
+
     const idGenerado = this.pedidoService.agregarPedido(
       [...this.carrito],
       this.metodoPago,
       this.total
     );
     this.ultimoPedidoId = idGenerado;
+    this.ultimoTicketId = idGenerado;
 
     const extrasUsados: string[] = [];
     this.carrito.forEach(item => {
@@ -307,6 +302,85 @@ export class Cajero implements OnInit {
         }, 2500);
       })
       .catch(err => console.error('Error al cancelar:', err));
+  }
+
+  generarBoleta() {
+    const doc = new jsPDF({ unit: 'mm', format: [80, 180] });
+    const ticketNum = this.ultimoTicketId.toString().slice(-4);
+    const fecha = new Date().toLocaleString('es-PE');
+
+    let y = 10;
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CAPITAN BURGER', 40, y, { align: 'center' });
+    y += 6;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('RUC: 20123456789', 40, y, { align: 'center' });
+    y += 5;
+
+    doc.setLineWidth(0.3);
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Ticket #${ticketNum}`, 5, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(`Fecha: ${fecha}`, 5, y);
+    y += 5;
+    doc.text(`Pago: ${this.ultimoMetodoPago}`, 5, y);
+    y += 6;
+
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    doc.setFontSize(9);
+    this.ultimoCarritoPagado.forEach(item => {
+      doc.setFont('helvetica', 'bold');
+      const nombre = item.nombre.length > 22 ? item.nombre.slice(0, 22) + '...' : item.nombre;
+      doc.text(nombre, 5, y);
+      doc.text(`S/ ${item.precio.toFixed(2)}`, 75, y, { align: 'right' });
+      y += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      if (item.tamano) {
+        doc.text(`  Tamaño: ${item.tamano}`, 5, y);
+        y += 4;
+      }
+      if (item.extras && item.extras.length > 0) {
+        doc.text(`  Extras: ${item.extras.join(', ')}`, 5, y);
+        y += 4;
+      }
+      if (item.observacion) {
+        doc.text(`  Obs: ${item.observacion}`, 5, y);
+        y += 4;
+      }
+      y += 1;
+      doc.setFontSize(9);
+    });
+
+    doc.line(5, y, 75, y);
+    y += 6;
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TOTAL:', 5, y);
+    doc.text(`S/ ${this.ultimoTotal.toFixed(2)}`, 75, y, { align: 'right' });
+    y += 10;
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Gracias por su preferencia', 40, y, { align: 'center' });
+    y += 4;
+    doc.text('¡Vuelva pronto!', 40, y, { align: 'center' });
+
+    doc.save(`boleta-${ticketNum}.pdf`);
   }
 
   volverLogin() {

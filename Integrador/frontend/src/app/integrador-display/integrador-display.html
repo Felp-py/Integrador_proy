@@ -3,10 +3,19 @@
 </div>
 
 <div class="header">
-  <h1>CAPITÁN BURGER - COCINA</h1>
-  <p>{{ fechaActual }}</p>
-  <div class="alerta-lleno" *ngIf="pedidosVisibles.length >= 20">
-    ⚠️ Cocina llena — no se aceptan más pedidos
+  <div class="header-top">
+    <div>
+      <h1>CAPITÁN BURGER - COCINA</h1>
+      <p>{{ fechaActual }}</p>
+    </div>
+    <div class="badge-espera" *ngIf="pedidosEnEspera > 0">
+      <span class="espera-icono">+</span>
+      <span class="espera-texto">{{ pedidosEnEspera }} pedido{{ pedidosEnEspera > 1 ? 's' : '' }} en espera</span>
+    </div>
+    <div class="badge-espera sin-espera" *ngIf="pedidosEnEspera === 0 && pedidosVisibles.length > 0">
+      <span class="espera-icono">✓</span>
+      <span class="espera-texto">Sin pedidos en espera</span>
+    </div>
   </div>
 </div>
 
