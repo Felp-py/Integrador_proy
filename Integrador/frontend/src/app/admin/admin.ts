@@ -1,13 +1,15 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule} from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { SocketService } from '../socket';
 import { Subscription } from 'rxjs';
+import { ReporteService } from '../reporte.service';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin.html',
   styleUrls: ['./admin.css']
 })
@@ -17,7 +19,8 @@ export class Admin implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private socket: SocketService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private reporte: ReporteService
   ) {}
 
   historialPedidos: any[] = [];
@@ -26,9 +29,17 @@ export class Admin implements OnInit, OnDestroy {
   ventasPorSemana: any[]  = [];
   stockProductos: any[]   = [];
   stockIngredientes: any[] = [];
-  vistaActual: string     = 'historial';
+  vistaActual: string     = 'hoy';
   vistaVentas: string     = 'dia';
   mesExpandido: string | null = null; 
+
+  // Filtros de stock
+  filtroStock: 'todos' | 'bajo' | 'vencimiento' = 'todos';
+  diasVencimientoAlerta: number = 7;
+
+  editandoId: string | null = null;
+  editandoTipo : 'producto' | 'ingrediente' | null = null;
+  editForm : any = {};
 
   ngOnInit() {
     this.cargarTodo();
@@ -48,6 +59,7 @@ export class Admin implements OnInit, OnDestroy {
     this.cargarVentasPorSemana();
     this.cargarStock();
   }
+
 
   cargarHistorial() {
     fetch('http://localhost:3000/historial')
@@ -95,8 +107,114 @@ export class Admin implements OnInit, OnDestroy {
       });
   }
 
-  // Total dinámico según la vista activa
+  diasParaVencer(item: any): number | null {
+    if (!item.fecha_vencimiento) return null;
+    const hoy   = new Date(); hoy.setHours(0, 0, 0, 0);
+    const vence = new Date(item.fecha_vencimiento);
+    return Math.round((vence.getTime() - hoy.getTime()) / 86400000);
+  }
+
+  etiquetaVencimiento(item: any): string {
+    const dias = this.diasParaVencer(item);
+    if (dias === null)  return '';
+    if (dias < 0)       return 'Vencido';
+    if (dias === 0)     return 'Vence hoy';
+    if (dias === 1)     return 'Vence mañana';
+    return `${dias}d`;
+  }
+
+  claseVencimiento(item: any): string {
+    const dias = this.diasParaVencer(item);
+    if (dias === null) return '';
+    if (dias <= 0)     return 'vence-critico';
+    if (dias <= this.diasVencimientoAlerta) return 'vence-proximo';
+    return 'vence-ok';
+  }
+
+  esBajoStock(item: any): boolean {
+    return item.stock_actual <= item.stock_minimo;
+  }
+
+  esProximoAVencer(item: any): boolean {
+    const dias = this.diasParaVencer(item);
+    return dias !== null && dias <= this.diasVencimientoAlerta;
+  }
+
+  get productosFiltrados(): any[] {
+    return this.stockProductos.filter(p => this.pasaFiltro(p));
+  }
+
+  get ingredientesFiltrados(): any[] {
+    return this.stockIngredientes.filter(i => this.pasaFiltro(i));
+  }
+
+  private pasaFiltro(item: any): boolean {
+    if (this.filtroStock === 'bajo')        return this.esBajoStock(item);
+    if (this.filtroStock === 'vencimiento') return this.esProximoAVencer(item);
+    return true;
+  }
+
+  get contadorAlertas(): number {
+    const bajosP = this.stockProductos.filter(p => this.esBajoStock(p) || this.esProximoAVencer(p)).length;
+    const bajosI = this.stockIngredientes.filter(i => this.esBajoStock(i) || this.esProximoAVencer(i)).length;
+    return bajosP + bajosI;
+  }
+
+  abrirEdicion(item: any, tipo: 'producto' | 'ingrediente') {
+    this.editandoId   = `${tipo}-${item.id}`;
+    this.editandoTipo = tipo;
+    this.editForm = {
+      stock_actual:       item.stock_actual,
+      stock_minimo:       item.stock_minimo,
+      stock_maximo:       item.stock_maximo,
+      fecha_vencimiento:  item.fecha_vencimiento
+        ? new Date(item.fecha_vencimiento).toISOString().slice(0, 10)
+        : ''
+    };
+  }
+
+  cerrarEdicion() {
+    this.editandoId   = null;
+    this.editandoTipo = null;
+    this.editForm     = {};
+  }
+
+  guardarEdicion(item: any) {
+    const tipo = this.editandoTipo!;
+    const url  = tipo === 'producto'
+      ? `http://localhost:3000/stock-admin/producto/${item.id}`
+      : `http://localhost:3000/stock-admin/ingrediente/${item.id}`;
+
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stock_actual:      Number(this.editForm.stock_actual),
+        stock_minimo:      Number(this.editForm.stock_minimo),
+        stock_maximo:      this.editForm.stock_maximo ? Number(this.editForm.stock_maximo) : undefined,
+        fecha_vencimiento: this.editForm.fecha_vencimiento || null
+      })
+    })
+      .then(r => r.json())
+      .then(() => {
+        this.cerrarEdicion();
+        this.cargarStock();
+      })
+      .catch(err => console.error('Error guardando:', err));
+  }
+
+  get pedidosHoy(): any[] {
+    const hoy = new Date();
+    const keyHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    return this.historialPedidos.filter(p => {
+      const fecha = new Date(p.creado_en);
+      const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+      return key === keyHoy;
+    });
+  }
+
   get totalPedidosMostrados(): number {
+    if (this.vistaActual === 'hoy')    return this.pedidosHoy.length;
     if (this.vistaActual === 'dia')    return (this.ventasPorDia || []).reduce((s, d) => s + Number(d.total_pedidos), 0);
     if (this.vistaActual === 'semana') return (this.ventasPorSemana || []).reduce((s, d) => s + Number(d.total_pedidos), 0);
     if (this.vistaActual === 'mes')    return (this.ventasPorMes || []).reduce((s, d) => s + Number(d.total_pedidos), 0);
@@ -104,6 +222,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   get totalVentasMostradas(): number {
+    if (this.vistaActual === 'hoy')    return this.pedidosHoy.reduce((s, p) => s + (p.total || 0), 0);
     if (this.vistaActual === 'dia')    return (this.ventasPorDia || []).reduce((s, d) => s + Number(d.total_ventas), 0);
     if (this.vistaActual === 'semana') return (this.ventasPorSemana || []).reduce((s, d) => s + Number(d.total_ventas), 0);
     if (this.vistaActual === 'mes')    return (this.ventasPorMes || []).reduce((s, d) => s + Number(d.total_ventas), 0);
@@ -160,6 +279,14 @@ export class Admin implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       })
       .catch(err => console.error('Error:', err));
+  }
+
+  exportarExcel(mes: any) {
+    this.reporte.generarReporteMes(
+      this.historialPedidos,
+      mes.mes_nombre,
+      mes.mes
+    );
   }
 
   logout() {

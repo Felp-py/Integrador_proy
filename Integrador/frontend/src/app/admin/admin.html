@@ -10,30 +10,36 @@
             <h3>Total Ventas</h3>
             <p>S/ {{ totalVentasMostradas | number:'1.2-2' }}</p>
         </div>
+        <!-- Alerta de stock si hay ítems críticos -->
+        <div class="alerta-stock-sidebar" *ngIf="contadorAlertas > 0" (click)="vistaActual = 'stock'; filtroStock = 'bajo'">
+            {{ contadorAlertas }} ítem{{ contadorAlertas > 1 ? 's' : '' }} requieren atención
+        </div>
         <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
     </div>
-
     <div class="panel">
-
         <!-- PESTAÑAS PRINCIPALES -->
         <div class="header-panel">
             <h2>Panel de Ventas</h2>
             <div class="tabs">
-                <button [class.activo]="vistaActual === 'historial'" (click)="vistaActual = 'historial'">Historial</button>
+                <button [class.activo]="vistaActual === 'hoy'" (click)="vistaActual = 'hoy'">Hoy</button>
                 <button [class.activo]="vistaActual === 'dia'"       (click)="vistaActual = 'dia'">Por Día</button>
                 <button [class.activo]="vistaActual === 'semana'"    (click)="vistaActual = 'semana'">Por Semana</button>
                 <button [class.activo]="vistaActual === 'mes'"       (click)="vistaActual = 'mes'">Por Mes</button>
-                <button [class.activo]="vistaActual === 'stock'"     (click)="vistaActual = 'stock'">Stock</button>
+                <button [class.activo]="vistaActual === 'stock'"     (click)="vistaActual = 'stock'">
+                    Stock
+                    <span class="badge-alerta" *ngIf="contadorAlertas > 0">{{ contadorAlertas }}</span>
+                </button>
             </div>
         </div>
-
-        <!-- VISTA: HISTORIAL -->
-        <ng-container *ngIf="vistaActual === 'historial'">
+        <!-- VISTA: HOY -->
+        <ng-container *ngIf="vistaActual === 'hoy'">
             <h3 style="margin-bottom:20px;color:#5b2d0f">
-                Pedidos recibidos: {{ historialPedidos.length }}
+                Pedidos de hoy: {{ pedidosHoy.length }}
             </h3>
-            <div class="sin-pedidos" *ngIf="historialPedidos.length === 0">No hay pedidos todavía</div>
-            <div class="pedido-card" *ngFor="let pedido of historialPedidos">
+            <div class="sin-pedidos" *ngIf="pedidosHoy.length === 0">
+                No hay pedidos hoy todavía
+            </div>
+            <div class="pedido-card" *ngFor="let pedido of pedidosHoy">
                 <div class="pedido-header">
                     <h3>Ticket #{{ pedido.id.toString().slice(-4) }}</h3>
                     <small style="color:#888; font-size:13px;">{{ pedido.creado_en | date:'dd/MM/yyyy HH:mm' }}</small>
@@ -56,8 +62,7 @@
                 <div class="total">Total: S/ {{ getTotalPedido(pedido) }}</div>
             </div>
         </ng-container>
-
-        <!-- VISTA: POR DÍA -->
+        <!-- VISTA: DÍA -->
         <ng-container *ngIf="vistaActual === 'dia'">
             <div class="tabla-mes" *ngFor="let d of ventasPorDia">
                 <div class="mes-header mes-clickeable" (click)="toggleMes(d.dia)">
@@ -94,8 +99,7 @@
                 </div>
             </div>
         </ng-container>
-
-        <!-- VISTA: POR SEMANA -->
+        <!-- VISTA: SEMANA -->
         <ng-container *ngIf="vistaActual === 'semana'">
             <div class="tabla-mes" *ngFor="let s of ventasPorSemana">
                 <div class="mes-header mes-clickeable" (click)="toggleMes(s.semana_key)">
@@ -109,7 +113,6 @@
                     <span class="pago-tarjeta">Tarjeta: <strong>{{ s.tarjeta }}</strong></span>
                     <span class="pago-yape">Yape: <strong>{{ s.yape }}</strong></span>
                 </div>
-                <!-- Pedidos expandidos con detalle -->
                 <div class="pedidos-del-mes" *ngIf="mesExpandido === s.semana_key">
                     <div class="pedido-mini" *ngFor="let pedido of pedidosDeLaSemana(s.semana_key)">
                         <div class="pedido-mini-header">
@@ -133,13 +136,15 @@
                 </div>
             </div>
         </ng-container>
-
-        <!-- VISTA: POR MES -->
+        <!-- VISTA: MES -->
         <ng-container *ngIf="vistaActual === 'mes'">
             <div class="tabla-mes" *ngFor="let mes of ventasPorMes">
                 <div class="mes-header mes-clickeable" (click)="toggleMes(mes.mes)">
                     <h3 style="font-size:20px;">{{ mes.mes_nombre }}</h3>
                     <span class="total-mes" style="font-size:20px;">S/ {{ mes.total_ventas | number:'1.2-2' }}</span>
+                    <button class="btn-excel" (click)="$event.stopPropagation(); exportarExcel(mes)">
+                        Excel
+                    </button>
                     <span class="expand-icon">{{ mesExpandido === mes.mes ? '▲' : '▼' }}</span>
                 </div>
                 <div class="mes-detalle" style="font-size:15px;">
@@ -148,7 +153,6 @@
                     <span class="pago-tarjeta">Tarjeta: <strong>{{ mes.tarjeta }}</strong></span>
                     <span class="pago-yape">Yape: <strong>{{ mes.yape }}</strong></span>
                 </div>
-                <!-- Pedidos expandidos con detalle de productos -->
                 <div class="pedidos-del-mes" *ngIf="mesExpandido === mes.mes">
                     <div class="pedido-mini" *ngFor="let pedido of pedidosDelMes(mes.mes)">
                         <div class="pedido-mini-header">
@@ -161,7 +165,6 @@
                             }">{{ pedido.pago }}</span>
                             <strong style="font-size:15px;">S/ {{ getTotalPedido(pedido) }}</strong>
                         </div>
-                        <!-- Detalle de productos del pedido -->
                         <div class="pedido-mini-items">
                             <div *ngFor="let item of pedido.items" class="mini-item">
                                 <span>• {{ item.nombre }}</span>
@@ -173,44 +176,159 @@
                 </div>
             </div>
         </ng-container>
-
         <!-- VISTA: STOCK -->
         <ng-container *ngIf="vistaActual === 'stock'">
-            <h3 style="color:#5b2d0f; margin-bottom:15px;">Ingredientes</h3>
-            <div class="stock-grid">
-                <div class="stock-card" *ngFor="let ing of stockIngredientes"
-                    [class.stock-ok]="ing.stock_actual > ing.stock_minimo"
-                    [class.stock-bajo]="ing.stock_actual <= ing.stock_minimo && ing.stock_actual > 0"
-                    [class.stock-agotado]="ing.stock_actual === 0">
-                    <h4>{{ ing.nombre }}</h4>
-                    <p class="stock-numero">{{ ing.stock_actual }}</p>
-                    <small>Mínimo: {{ ing.stock_minimo }}</small>
-                    <span class="stock-badge" [style.background]="
-                        ing.stock_actual === 0 ? '#c0392b' :
-                        ing.stock_actual <= ing.stock_minimo ? 'orange' : '#27ae60'">
-                        {{ ing.stock_actual === 0 ? 'Agotado' : ing.stock_actual <= ing.stock_minimo ? 'Stock bajo' : 'OK' }}
+            <!-- BARRA DE FILTROS -->
+            <div class="stock-filtros">
+                <div class="filtro-titulo">
+                    <h3>Inventario</h3>
+                    <span class="filtro-sub" *ngIf="contadorAlertas > 0">
+                        {{ contadorAlertas }} ítem{{ contadorAlertas > 1 ? 's' : '' }} requieren atención
                     </span>
                 </div>
-            </div>
-
-            <h3 style="color:#5b2d0f; margin:25px 0 15px 0;">Productos</h3>
-            <div class="stock-grid">
-                <div class="stock-card" *ngFor="let prod of stockProductos"
-                    [class.stock-ok]="prod.stock_actual > prod.stock_minimo"
-                    [class.stock-bajo]="prod.stock_actual <= prod.stock_minimo && prod.stock_actual > 0"
-                    [class.stock-agotado]="prod.stock_actual === 0">
-                    <small class="categoria-badge">{{ prod.categoria }}</small>
-                    <h4>{{ prod.nombre }}</h4>
-                    <p class="stock-numero">{{ prod.stock_actual }}</p>
-                    <small>Mínimo: {{ prod.stock_minimo }}</small>
-                    <span class="stock-badge" [style.background]="
-                        prod.stock_actual === 0 ? '#c0392b' :
-                        prod.stock_actual <= prod.stock_minimo ? 'orange' : '#27ae60'">
-                        {{ prod.stock_actual === 0 ? 'Agotado' : prod.stock_actual <= prod.stock_minimo ? 'Stock bajo' : 'OK' }}
-                    </span>
+                <div class="filtro-botones">
+                    <button [class.activo]="filtroStock === 'todos'"
+                            (click)="filtroStock = 'todos'">
+                        Todos
+                    </button>
+                    <button [class.activo]="filtroStock === 'bajo'"
+                            (click)="filtroStock = 'bajo'"
+                            class="btn-filtro-bajo">
+                        Bajo Stock
+                        <span class="badge-mini" *ngIf="filtroStock === 'bajo'">
+                            {{ productosFiltrados.length + ingredientesFiltrados.length }}
+                        </span>
+                    </button>
+                    <button [class.activo]="filtroStock === 'vencimiento'"
+                            (click)="filtroStock = 'vencimiento'"
+                            class="btn-filtro-vence">
+                        Próx. a vencer
+                    </button>
+                    <label class="dias-label" *ngIf="filtroStock === 'vencimiento'">
+                        Alerta si vence en
+                        <input type="number" [(ngModel)]="diasVencimientoAlerta"
+                                min="1" max="90" class="input-dias"> días
+                    </label>
                 </div>
             </div>
+            <!-- SIN RESULTADOS -->
+            <div class="sin-pedidos" *ngIf="ingredientesFiltrados.length === 0 && productosFiltrados.length === 0">
+                Todo en orden — no hay alertas con el filtro actual
+            </div>
+            <!-- ── INGREDIENTES ── -->
+            <ng-container *ngIf="ingredientesFiltrados.length > 0">
+                <h3 class="seccion-titulo">Ingredientes</h3>
+                <div class="stock-grid">
+                    <div class="stock-card"
+                         *ngFor="let ing of ingredientesFiltrados"
+                            [class.stock-ok]="ing.stock_actual > ing.stock_minimo"
+                            [class.stock-bajo]="ing.stock_actual <= ing.stock_minimo && ing.stock_actual > 0"
+                            [class.stock-agotado]="ing.stock_actual === 0">
+                        <!-- Vista normal -->
+                        <ng-container *ngIf="editandoId !== 'ingrediente-' + ing.id">
+                            <h4>{{ ing.nombre }}</h4>
+                            <p class="stock-numero">{{ ing.stock_actual }}</p>
+                            <small>Mínimo: {{ ing.stock_minimo }}</small>
+                            <!-- Badge vencimiento -->
+                            <span class="vence-badge" [class]="claseVencimiento(ing)"
+                                  *ngIf="ing.fecha_vencimiento">
+                                {{ etiquetaVencimiento(ing) }}
+                            </span>
+                            <small class="fecha-vence" *ngIf="ing.fecha_vencimiento">
+                                {{ ing.fecha_vencimiento | date:'dd/MM/yyyy' }}
+                            </small>
+                            <small class="fecha-vence sin-fecha" *ngIf="!ing.fecha_vencimiento">
+                                Sin fecha
+                            </small>
+                            <!-- Badge stock -->
+                            <span class="stock-badge" [style.background]="
+                                ing.stock_actual === 0 ? '#c0392b' :
+                                ing.stock_actual <= ing.stock_minimo ? 'orange' : '#27ae60'">
+                                {{ ing.stock_actual === 0 ? 'Agotado' : ing.stock_actual <= ing.stock_minimo ? 'Stock bajo' : 'OK' }}
+                            </span>
+                            <button class="btn-editar" (click)="abrirEdicion(ing, 'ingrediente')">Editar</button>
+                        </ng-container>
+                        <!-- Formulario de edición -->
+                        <ng-container *ngIf="editandoId === 'ingrediente-' + ing.id">
+                            <h4>{{ ing.nombre }}</h4>
+                            <div class="edit-form">
+                                <label>Stock actual
+                                    <input type="number" [(ngModel)]="editForm.stock_actual" min="0">
+                                </label>
+                                <label>Stock mínimo
+                                    <input type="number" [(ngModel)]="editForm.stock_minimo" min="0">
+                                </label>
+                                <label>Vencimiento
+                                    <input type="date" [(ngModel)]="editForm.fecha_vencimiento">
+                                </label>
+                                <div class="edit-acciones">
+                                    <button class="btn-guardar" (click)="guardarEdicion(ing)">Guardar</button>
+                                    <button class="btn-cancelar-edit" (click)="cerrarEdicion()">Cancelar</button>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
+            <!-- ── PRODUCTOS ── -->
+            <ng-container *ngIf="productosFiltrados.length > 0">
+                <h3 class="seccion-titulo">Productos</h3>
+                <div class="stock-grid">
+                    <div class="stock-card"
+                         *ngFor="let prod of productosFiltrados"
+                            [class.stock-ok]="prod.stock_actual > prod.stock_minimo"
+                            [class.stock-bajo]="prod.stock_actual <= prod.stock_minimo && prod.stock_actual > 0"
+                            [class.stock-agotado]="prod.stock_actual === 0">
+                        <!-- Vista normal -->
+                        <ng-container *ngIf="editandoId !== 'producto-' + prod.id">
+                            <small class="categoria-badge">{{ prod.categoria }}</small>
+                            <h4>{{ prod.nombre }}</h4>
+                            <p class="stock-numero">{{ prod.stock_actual }}</p>
+                            <small>Mínimo: {{ prod.stock_minimo }}</small>
+                            <!-- Badge vencimiento -->
+                            <span class="vence-badge" [class]="claseVencimiento(prod)"
+                                  *ngIf="prod.fecha_vencimiento">
+                                {{ etiquetaVencimiento(prod) }}
+                            </span>
+                            <small class="fecha-vence" *ngIf="prod.fecha_vencimiento">
+                                {{ prod.fecha_vencimiento | date:'dd/MM/yyyy' }}
+                            </small>
+                            <small class="fecha-vence sin-fecha" *ngIf="!prod.fecha_vencimiento">
+                                Sin fecha
+                            </small>
+                            <span class="stock-badge" [style.background]="
+                                prod.stock_actual === 0 ? '#c0392b' :
+                                prod.stock_actual <= prod.stock_minimo ? 'orange' : '#27ae60'">
+                                {{ prod.stock_actual === 0 ? 'Agotado' : prod.stock_actual <= prod.stock_minimo ? 'Stock bajo' : 'OK' }}
+                            </span>
+                            <button class="btn-editar" (click)="abrirEdicion(prod, 'producto')">Editar</button>
+                        </ng-container>
+                        <!-- Formulario de edición -->
+                        <ng-container *ngIf="editandoId === 'producto-' + prod.id">
+                            <small class="categoria-badge">{{ prod.categoria }}</small>
+                            <h4>{{ prod.nombre }}</h4>
+                            <div class="edit-form">
+                                <label>Stock actual
+                                    <input type="number" [(ngModel)]="editForm.stock_actual" min="0">
+                                </label>
+                                <label>Stock mínimo
+                                    <input type="number" [(ngModel)]="editForm.stock_minimo" min="0">
+                                </label>
+                                <label>Stock máximo
+                                    <input type="number" [(ngModel)]="editForm.stock_maximo" min="0">
+                                </label>
+                                <label>Vencimiento
+                                    <input type="date" [(ngModel)]="editForm.fecha_vencimiento">
+                                </label>
+                                <div class="edit-acciones">
+                                    <button class="btn-guardar" (click)="guardarEdicion(prod)">Guardar</button>
+                                    <button class="btn-cancelar-edit" (click)="cerrarEdicion()">Cancelar</button>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
         </ng-container>
-
     </div>
 </div>

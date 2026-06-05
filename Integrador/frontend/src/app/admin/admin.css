@@ -415,3 +415,226 @@ body{
     margin-left: auto;
     padding-right: 15px;
 }
+/* ─── FILTROS DE STOCK ────────────────────────────────────── */
+
+.stock-filtros {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 18px;
+    padding: 16px 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+}
+
+.filtro-titulo h3   { color: #5b2d0f; font-size: 20px; margin: 0; }
+.filtro-sub         { font-size: 13px; color: #c0392b; font-weight: bold; margin-top: 2px; display: block; }
+
+.filtro-botones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filtro-botones button {
+    padding: 8px 18px;
+    border: 2px solid #e8d3ad;
+    border-radius: 12px;
+    background: white;
+    color: #4b250f;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.filtro-botones button:hover { background: #f5ebe0; }
+
+.filtro-botones button.activo {
+    background: #5b2d0f;
+    color: white;
+    border-color: #5b2d0f;
+}
+
+.btn-filtro-bajo.activo  { background: #e67e22 !important; border-color: #e67e22 !important; }
+.btn-filtro-vence.activo { background: #8e44ad !important; border-color: #8e44ad !important; }
+
+.dias-label {
+    font-size: 13px;
+    color: #4b250f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.input-dias {
+    width: 52px;
+    padding: 4px 6px;
+    border: 2px solid #d89b45;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    color: #4b250f;
+}
+
+/* ─── BADGE ALERTA EN PESTAÑA ────────────────────────────── */
+
+.badge-alerta {
+    display: inline-block;
+    background: #c0392b;
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ─── ALERTA EN SIDEBAR ──────────────────────────────────── */
+
+.alerta-stock-sidebar {
+    background: #fdf0d5;
+    border: 2px solid #e67e22;
+    border-radius: 14px;
+    padding: 12px 15px;
+    font-size: 13px;
+    color: #7d4e07;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: 0.2s;
+}
+
+.alerta-stock-sidebar:hover { background: #fce3b0; }
+
+/* ─── VENCIMIENTO ────────────────────────────────────────── */
+
+.vence-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    margin-top: 4px;
+}
+
+.vence-critico { background: #c0392b; animation: pulso 1.4s infinite; }
+.vence-proximo { background: #d35400; }
+.vence-ok      { background: #27ae60; }
+
+@keyframes pulso {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+.fecha-vence {
+    font-size: 11px;
+    color: #888;
+    display: block;
+}
+
+.sin-fecha { color: #bbb; font-style: italic; }
+
+/* ─── EDICIÓN INLINE ─────────────────────────────────────── */
+
+.btn-editar {
+    margin-top: 8px;
+    background: #f0dfc2;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 11px;
+    color: #4b250f;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-editar:hover { background: #d89b45; color: white; }
+
+.edit-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.edit-form label {
+    font-size: 11px;
+    color: #5b2d0f;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.edit-form input {
+    padding: 5px 8px;
+    border: 2px solid #d89b45;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #4b250f;
+    width: 100%;
+}
+
+.edit-acciones {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.btn-guardar {
+    flex: 1;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-guardar:hover { background: #1e8449; }
+
+.btn-cancelar-edit {
+    background: #bdc3c7;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-cancelar-edit:hover { background: #95a5a6; }
+
+.seccion-titulo {
+    color: #5b2d0f;
+    margin: 20px 0 12px 0;
+    font-size: 18px;
+}
+
+.btn-excel {
+    background: #1a6b3c;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-excel:hover { background: #27ae60; }

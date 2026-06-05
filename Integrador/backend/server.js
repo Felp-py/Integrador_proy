@@ -329,22 +329,61 @@ app.get('/stock', async (req, res) => {
   }
 });
 
-// Stock completo para admin
+// Stock completo para admin (incluye fecha_vencimiento)
 app.get('/stock-admin', async (req, res) => {
   try {
     const [productos] = await db.query(
       `SELECT p.id, p.nombre, p.categoria,
-        i.stock_actual, i.stock_minimo, i.stock_maximo
+        i.stock_actual, i.stock_minimo, i.stock_maximo,
+        i.fecha_vencimiento
         FROM productos p
         JOIN inventario i ON i.producto_id = p.id
         WHERE p.activo = TRUE
         ORDER BY p.categoria, p.nombre`
     );
     const [ingredientes] = await db.query(
-      `SELECT id, nombre, stock_actual, stock_minimo
+      `SELECT id, nombre, stock_actual, stock_minimo, fecha_vencimiento
         FROM ingredientes ORDER BY nombre`
     );
     res.json({ productos, ingredientes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Actualizar fecha de vencimiento e inventario
+app.put('/stock-admin/producto/:id', async (req, res) => {
+  const { id } = req.params;
+  const { stock_actual, stock_minimo, stock_maximo, fecha_vencimiento } = req.body;
+  try {
+    await db.query(
+      `UPDATE inventario SET
+        stock_actual = COALESCE(?, stock_actual),
+        stock_minimo = COALESCE(?, stock_minimo),
+        stock_maximo = COALESCE(?, stock_maximo),
+        fecha_vencimiento = ?
+        WHERE producto_id = ?`,
+      [stock_actual, stock_minimo, stock_maximo, fecha_vencimiento || null, id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/stock-admin/ingrediente/:id', async (req, res) => {
+  const { id } = req.params;
+  const { stock_actual, stock_minimo, fecha_vencimiento } = req.body;
+  try {
+    await db.query(
+      `UPDATE ingredientes SET
+        stock_actual = COALESCE(?, stock_actual),
+        stock_minimo = COALESCE(?, stock_minimo),
+        fecha_vencimiento = ?
+        WHERE id = ?`,
+      [stock_actual, stock_minimo, fecha_vencimiento || null, id]
+    );
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
