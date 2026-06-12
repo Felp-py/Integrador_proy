@@ -528,7 +528,7 @@ body{
     margin-top: 4px;
 }
 
-.vence-critico { background: #c0392b; animation: pulso 1.4s infinite; }
+.vence-critico { background: #c0392b;  }
 .vence-proximo { background: #d35400; }
 .vence-ok      { background: #27ae60; }
 

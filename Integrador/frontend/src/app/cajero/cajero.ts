@@ -33,7 +33,7 @@ export class Cajero implements OnInit {
   tamanoSeleccionado = 'Personal';
   stockMap: { [producto_id: number]: number } = {};
   stockCargado = false;
-  stockIngredientes: { [nombre: string]: number } = {}; // ← agregado
+  stockIngredientes: { [nombre: string]: number } = {}; 
   mostrarConfirmacion = false;
   mensajeConfirmacion = '';
   ultimoCarritoPagado: PedidoItem[] = [];
@@ -43,7 +43,7 @@ export class Cajero implements OnInit {
 
   ngOnInit() {
     this.cargarStock();
-    this.cargarStockIngredientes(); // ← agregado
+    this.cargarStockIngredientes(); 
   }
 
   cargarStock() {
@@ -61,7 +61,6 @@ export class Cajero implements OnInit {
       .catch(err => console.error('ERROR STOCK:', err));
   }
 
-  // ← método agregado
   cargarStockIngredientes() {
     fetch('http://localhost:3000/stock-ingredientes')
       .then(res => res.json())
@@ -278,24 +277,18 @@ export class Cajero implements OnInit {
       }, 2500);
       return;
     }
-
     const confirmar = confirm('¿Cancelar y eliminar permanentemente el último pedido?');
     if (!confirmar) return;
-
     fetch(`http://localhost:3000/pedidos/${this.ultimoPedidoId}`, { method: 'DELETE' })
       .then(() => {
         this.ultimoPedidoId = null;
-
         setTimeout(() => {
           this.cargarStock();
           this.cargarStockIngredientes();
         }, 500);
-
-        // ← un solo bloque, sin anidar setTimeout
         this.mensajeConfirmacion = 'Pedido cancelado.\nEl stock fue recuperado.';
         this.mostrarConfirmacion = true;
         this.cdr.detectChanges();
-
         setTimeout(() => {
           this.mostrarConfirmacion = false;
           this.cdr.detectChanges();
@@ -305,80 +298,125 @@ export class Cajero implements OnInit {
   }
 
   generarBoleta() {
-    const doc = new jsPDF({ unit: 'mm', format: [80, 180] });
+    const doc = new jsPDF({ unit: 'mm', format: [80, 220] });
     const ticketNum = this.ultimoTicketId.toString().slice(-4);
-    const fecha = new Date().toLocaleString('es-PE');
+    const fecha = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const hora  = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 
-    let y = 10;
+    // ── HEADER MARRÓN ────────────────────────────────────────────
+    doc.setFillColor(75, 37, 15);
+    doc.rect(0, 0, 80, 36, 'F');
 
-    doc.setFontSize(14);
+    doc.setTextColor(216, 155, 69);          // dorado
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('CAPITAN BURGER', 40, y, { align: 'center' });
-    y += 6;
+    doc.text('CAPITAN', 40, 13, { align: 'center' });
 
-    doc.setFontSize(9);
+    doc.setTextColor(253, 246, 236);         // crema
+    doc.setFontSize(18);
+    doc.text('BURGER', 40, 24, { align: 'center' });
+
+    doc.setTextColor(180, 140, 90);
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
-    doc.text('RUC: 20123456789', 40, y, { align: 'center' });
-    y += 5;
+    doc.text('RUC: 20123456789', 40, 32, { align: 'center' });
 
-    doc.setLineWidth(0.3);
-    doc.line(5, y, 75, y);
-    y += 5;
+    // ── LÍNEA DORADA ─────────────────────────────────────────────
+    doc.setDrawColor(216, 155, 69);
+    doc.setLineWidth(0.6);
+    doc.line(5, 38, 75, 38);
 
+    // ── TICKET # y FECHA ─────────────────────────────────────────
+    let y = 46;
+    doc.setTextColor(50, 50, 50);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text(`Ticket #${ticketNum}`, 5, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.text(`Fecha: ${fecha}`, 5, y);
-    y += 5;
-    doc.text(`Pago: ${this.ultimoMetodoPago}`, 5, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`${fecha}  ${hora}`, 75, y, { align: 'right' });
+    y += 7;
+
+    // ── BADGE MÉTODO DE PAGO ──────────────────────────────────────
+    const pagoColors: Record<string, [number, number, number]> = {
+      Efectivo: [34, 139, 34],
+      Tarjeta:  [26, 82, 118],
+      Yape:     [108, 52, 131],
+    };
+    const [pr, pg, pb] = pagoColors[this.ultimoMetodoPago] ?? [80, 80, 80];
+    doc.setFillColor(pr, pg, pb);
+    doc.roundedRect(5, y - 4, 28, 6, 1.5, 1.5, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text(this.ultimoMetodoPago, 19, y, { align: 'center' });
+    y += 8;
+
+    // ── LÍNEA PUNTEADA ────────────────────────────────────────────
+    doc.setDrawColor(200, 180, 150);
+    doc.setLineWidth(0.3);
+    doc.setLineDashPattern([1, 1.5], 0);
+    doc.line(5, y, 75, y);
+    doc.setLineDashPattern([], 0);
     y += 6;
 
-    doc.line(5, y, 75, y);
-    y += 5;
-
-    doc.setFontSize(9);
+    // ── ITEMS ─────────────────────────────────────────────────────
     this.ultimoCarritoPagado.forEach(item => {
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      const nombre = item.nombre.length > 22 ? item.nombre.slice(0, 22) + '...' : item.nombre;
+      doc.setTextColor(40, 40, 40);
+      const nombre = item.nombre.length > 24 ? item.nombre.slice(0, 24) + '...' : item.nombre;
       doc.text(nombre, 5, y);
+      doc.setTextColor(75, 37, 15);
       doc.text(`S/ ${item.precio.toFixed(2)}`, 75, y, { align: 'right' });
       y += 5;
 
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
+      doc.setTextColor(120, 120, 120);
+
       if (item.tamano) {
-        doc.text(`  Tamaño: ${item.tamano}`, 5, y);
+        doc.text(`  Tamano: ${item.tamano}`, 5, y);
         y += 4;
       }
       if (item.extras && item.extras.length > 0) {
-        doc.text(`  Extras: ${item.extras.join(', ')}`, 5, y);
-        y += 4;
+        const lines = doc.splitTextToSize(`  Extras: ${item.extras.join(', ')}`, 68);
+        doc.text(lines, 5, y);
+        y += lines.length * 4;
       }
       if (item.observacion) {
-        doc.text(`  Obs: ${item.observacion}`, 5, y);
-        y += 4;
+        const lines = doc.splitTextToSize(`  Obs: ${item.observacion}`, 68);
+        doc.text(lines, 5, y);
+        y += lines.length * 4;
       }
-      y += 1;
-      doc.setFontSize(9);
+      y += 2;
     });
 
+    // ── SEPARADOR DORADO ─────────────────────────────────────────
+    doc.setDrawColor(216, 155, 69);
+    doc.setLineWidth(0.5);
     doc.line(5, y, 75, y);
-    y += 6;
+    y += 7;
 
-    doc.setFontSize(12);
+    // ── TOTAL ─────────────────────────────────────────────────────
+    doc.setFillColor(75, 37, 15);
+    doc.roundedRect(5, y - 5, 70, 12, 2, 2, 'F');
+    doc.setTextColor(216, 155, 69);
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.text('TOTAL:', 5, y);
-    doc.text(`S/ ${this.ultimoTotal.toFixed(2)}`, 75, y, { align: 'right' });
-    y += 10;
+    doc.text('TOTAL', 12, y + 3);
+    doc.setTextColor(253, 246, 236);
+    doc.text(`S/ ${this.ultimoTotal.toFixed(2)}`, 71, y + 3, { align: 'right' });
+    y += 18;
 
+    // ── PIE ───────────────────────────────────────────────────────
+    doc.setTextColor(130, 100, 70);
     doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Gracias por su preferencia', 40, y, { align: 'center' });
-    y += 4;
-    doc.text('¡Vuelva pronto!', 40, y, { align: 'center' });
+    doc.setFont('helvetica', 'italic');
+    doc.text('Gracias por su preferencia!', 40, y, { align: 'center' });
+    y += 5;
+    doc.text('Vuelva pronto!', 40, y, { align: 'center' });
 
     doc.save(`boleta-${ticketNum}.pdf`);
   }
