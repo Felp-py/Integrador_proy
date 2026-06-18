@@ -16,10 +16,11 @@ const io = new Server(server, {
 
 
 const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '081806',
-  database: 'capitan_burger',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
   waitForConnections: true,
   connectionLimit: 10
 });
@@ -434,5 +435,9 @@ async function iniciar() {
     console.log('Servidor corriendo en http://localhost:3000');
   });
 }
+
+server.listen(process.env.PORT || 3000, () => {
+  console.log('Servidor corriendo');
+});
 
 iniciar();
