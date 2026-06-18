@@ -7,59 +7,42 @@ import { Pedido } from './pedido';
   providedIn: 'root'
 })
 export class SocketService {
-
   private socket: Socket;
-
   constructor() {
-
-    this.socket = io('http://localhost:3000');
-
+    this.socket = io('https://integrador-proy-1.onrender.com');
     this.socket.on('connect', () => {
-      console.log('🟢 Conectado al socket');
+      console.log('Conectado al socket');
     });
-
     this.socket.on('disconnect', () => {
-      console.log('🔴 Desconectado');
+      console.log('Desconectado');
     });
-
   }
 
   escucharPedidos(): Observable<Pedido[]> {
-
     return new Observable(observer => {
-
       this.socket.on(
         'pedidosActualizados',
         (data: Pedido[]) => {
-
           console.log(
-            '📦 evento recibido:',
+            'evento recibido:',
             data
           );
-
           observer.next(data);
-
         }
       );
-
     });
-
   }
 
   enviarPedido(pedido: Pedido) {
-
     console.log(
-      '📤 enviando pedido:',
+      'enviando pedido:',
       pedido
     );
-
     this.socket.emit(
       'nuevoPedido',
       pedido
     );
-
   }
-
   actualizarPedidos(pedidos: Pedido[]) {
     this.socket.emit(
       'actualizarPedidos',

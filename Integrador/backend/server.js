@@ -432,7 +432,7 @@ app.get('/pedidos-activos-count', async (req, res) => {
 async function iniciar() {
   await cargarPedidosActivos();
   server.listen(3000, () => {
-    console.log('Servidor corriendo en http://localhost:3000');
+    console.log('Servidor corriendo en https://integrador-proy-1.onrender.com');
   });
 }
 

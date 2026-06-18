@@ -62,7 +62,7 @@ export class Admin implements OnInit, OnDestroy {
 
 
   cargarHistorial() {
-    fetch('http://localhost:3000/historial')
+    fetch('https://integrador-proy-1.onrender.com/historial')
       .then(res => res.json())
       .then((data: any[]) => {
         this.historialPedidos = data;
@@ -71,7 +71,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   cargarVentasPorDia() {
-    fetch('http://localhost:3000/ventas-por-dia')
+    fetch('https://integrador-proy-1.onrender.com/ventas-por-dia')
       .then(res => res.json())
       .then((data: any) => {
         this.ventasPorDia = Array.isArray(data) ? data : []; 
@@ -80,7 +80,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   cargarVentasPorMes() {
-    fetch('http://localhost:3000/ventas-por-mes')
+    fetch('https://integrador-proy-1.onrender.com/ventas-por-mes')
       .then(res => res.json())
       .then((data: any) => {
         this.ventasPorMes = Array.isArray(data) ? data : []; 
@@ -89,7 +89,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   cargarVentasPorSemana() {
-    fetch('http://localhost:3000/ventas-por-semana')
+    fetch('https://integrador-proy-1.onrender.com/ventas-por-semana')
       .then(res => res.json())
       .then((data: any) => {
         this.ventasPorSemana = Array.isArray(data) ? data : []; 
@@ -98,7 +98,7 @@ export class Admin implements OnInit, OnDestroy {
   }
 
   cargarStock() {
-    fetch('http://localhost:3000/stock-admin')
+    fetch('https://integrador-proy-1.onrender.com/stock-admin')
       .then(res => res.json())
       .then((data: any) => {
         this.stockProductos   = data.productos;
@@ -182,8 +182,8 @@ export class Admin implements OnInit, OnDestroy {
   guardarEdicion(item: any) {
     const tipo = this.editandoTipo!;
     const url  = tipo === 'producto'
-      ? `http://localhost:3000/stock-admin/producto/${item.id}`
-      : `http://localhost:3000/stock-admin/ingrediente/${item.id}`;
+      ? `https://integrador-proy-1.onrender.com/stock-admin/producto/${item.id}`
+      : `https://integrador-proy-1.onrender.com/stock-admin/ingrediente/${item.id}`;
 
     fetch(url, {
       method: 'PUT',
@@ -270,7 +270,7 @@ export class Admin implements OnInit, OnDestroy {
   cancelarPedido(id: number) {
     const confirmar = confirm('¿Eliminar este pedido permanentemente?');
     if (!confirmar) return;
-    fetch(`http://localhost:3000/pedidos/${id}`, { method: 'DELETE' })
+    fetch(`https://integrador-proy-1.onrender.com/pedidos/${id}`, { method: 'DELETE' })
       .then(() => {
         this.historialPedidos = this.historialPedidos.filter(p => p.id !== id);
         this.cargarVentasPorMes();

@@ -47,7 +47,7 @@ export class Cajero implements OnInit {
   }
 
   cargarStock() {
-    fetch('http://localhost:3000/stock')
+    fetch('https://integrador-proy-1.onrender.com/stock')
       .then(res => res.json())
       .then((data: any[]) => {
         const mapa: { [id: number]: number } = {};
@@ -62,7 +62,7 @@ export class Cajero implements OnInit {
   }
 
   cargarStockIngredientes() {
-    fetch('http://localhost:3000/stock-ingredientes')
+    fetch('https://integrador-proy-1.onrender.com/stock-ingredientes')
       .then(res => res.json())
       .then((data: any[]) => {
         const mapa: { [nombre: string]: number } = {};
@@ -240,7 +240,7 @@ export class Cajero implements OnInit {
     });
 
     if (extrasUsados.length > 0) {
-      fetch('http://localhost:3000/stock-ingredientes/descontar', {
+      fetch('https://integrador-proy-1.onrender.com/stock-ingredientes/descontar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombres: extrasUsados })
@@ -279,7 +279,7 @@ export class Cajero implements OnInit {
     }
     const confirmar = confirm('¿Cancelar y eliminar permanentemente el último pedido?');
     if (!confirmar) return;
-    fetch(`http://localhost:3000/pedidos/${this.ultimoPedidoId}`, { method: 'DELETE' })
+    fetch(`https://integrador-proy-1.onrender.com/pedidos/${this.ultimoPedidoId}`, { method: 'DELETE' })
       .then(() => {
         this.ultimoPedidoId = null;
         setTimeout(() => {
