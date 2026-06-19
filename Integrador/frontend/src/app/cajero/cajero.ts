@@ -41,9 +41,12 @@ export class Cajero implements OnInit {
   ultimoTotal: number = 0;
   ultimoTicketId: number = 0;
 
+  productosCargados = false;
+
   ngOnInit() {
     this.cargarStock();
-    this.cargarStockIngredientes(); 
+    this.cargarStockIngredientes();
+    this.cargarProductos();
   }
 
   cargarStock() {
@@ -108,28 +111,29 @@ export class Cajero implements OnInit {
     { nombre: 'Complementos', color: '#4caf50' }
   ];
 
-  productos: PedidoItem[] = [
-    { producto_id: 1,  nombre: 'Cheddar Burger',  precio: 18, categoria: 'Hamburguesas', color: '#6B3E26' },
-    { producto_id: 2,  nombre: 'Royal Burger',     precio: 22, categoria: 'Hamburguesas', color: '#6B3E26' },
-    { producto_id: 3,  nombre: 'Doble Carne',      precio: 25, categoria: 'Hamburguesas', color: '#6B3E26' },
-    { producto_id: 4,  nombre: 'BBQ Burger',       precio: 24, categoria: 'Hamburguesas', color: '#6B3E26' },
-    { producto_id: 5,  nombre: 'Burger Jalapeño',  precio: 26, categoria: 'Hamburguesas', color: '#6B3E26' },
-    { producto_id: 6,  nombre: 'Cheese Bacon',     precio: 27, categoria: 'Hamburguesas', color: '#6B3E26' },
-    { producto_id: 7,  nombre: 'Combo Cheddar',    precio: 32, categoria: 'Combos',       color: '#D89B45' },
-    { producto_id: 8,  nombre: 'Combo Royal',      precio: 35, categoria: 'Combos',       color: '#D89B45' },
-    { producto_id: 9,  nombre: 'Mega Combo',       precio: 40, categoria: 'Combos',       color: '#D89B45' },
-    { producto_id: 10, nombre: 'Combo Familiar',   precio: 55, categoria: 'Combos',       color: '#D89B45' },
-    { producto_id: 11, nombre: 'Coca Cola',        precio: 5,  categoria: 'Bebidas',      color: '#4A90E2' },
-    { producto_id: 12, nombre: 'Inca Kola',        precio: 5,  categoria: 'Bebidas',      color: '#4A90E2' },
-    { producto_id: 13, nombre: 'Sprite',           precio: 5,  categoria: 'Bebidas',      color: '#4A90E2' },
-    { producto_id: 14, nombre: 'Fanta',            precio: 5,  categoria: 'Bebidas',      color: '#4A90E2' },
-    { producto_id: 15, nombre: 'Milkshake',        precio: 12, categoria: 'Bebidas',      color: '#4A90E2' },
-    { producto_id: 16, nombre: 'Papas Fritas',     precio: 8,  categoria: 'Complementos', color: '#4CAF50' },
-    { producto_id: 17, nombre: 'Nuggets',          precio: 10, categoria: 'Complementos', color: '#4CAF50' },
-    { producto_id: 18, nombre: 'Aros de Cebolla',  precio: 9,  categoria: 'Complementos', color: '#4CAF50' },
-    { producto_id: 19, nombre: 'Alitas BBQ',       precio: 15, categoria: 'Complementos', color: '#4CAF50' },
-    { producto_id: 20, nombre: 'Papas Cheddar',    precio: 14, categoria: 'Complementos', color: '#4CAF50' },
-  ];
+  productos: PedidoItem[] = [];
+
+  cargarProductos() {
+    fetch('https://integrador-proy-1.onrender.com/productos')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        this.productos = (data || []).map(p => ({
+          producto_id: p.id,
+          nombre: p.nombre,
+          precio: Number(p.precio),
+          categoria: p.categoria,
+          color: this.colorPorCategoria(p.categoria)
+        }));
+        this.productosCargados = true;
+        this.cdr.detectChanges();
+      })
+      .catch(err => console.error('Error cargando productos:', err));
+  }
+
+  colorPorCategoria(categoria: string): string {
+    const cat = this.categorias.find(c => c.nombre === categoria);
+    return cat ? cat.color : '#6b3e26';
+  }
 
   get productosFiltrados() {
     return this.productos.filter(p => p.categoria === this.categoriaSeleccionada);

@@ -262,7 +262,7 @@
                                     <input type="date" [(ngModel)]="editForm.fecha_vencimiento">
                                 </label>
                                 <div class="edit-acciones">
-                                    <button class="btn-guardar" (click)="guardarEdicion(ing)">Guardar</button>
+                                    <button class="btn-guardar" [disabled]="guardando" (click)="guardarEdicion(ing)">{{ guardando ? 'Guardando...' : 'Guardar' }}</button>
                                     <button class="btn-cancelar-edit" (click)="cerrarEdicion()">Cancelar</button>
                                 </div>
                             </div>
@@ -285,17 +285,10 @@
                             <h4>{{ prod.nombre }}</h4>
                             <p class="stock-numero">{{ prod.stock_actual }}</p>
                             <small>Mínimo: {{ prod.stock_minimo }}</small>
-                            <!-- Badge vencimiento -->
-                            <span class="vence-badge" [class]="claseVencimiento(prod)"
-                                  *ngIf="prod.fecha_vencimiento">
-                                {{ etiquetaVencimiento(prod) }}
+                            <!-- Precio -->
+                            <span class="vence-badge vence-ok">
+                                S/ {{ prod.precio }}
                             </span>
-                            <small class="fecha-vence" *ngIf="prod.fecha_vencimiento">
-                                {{ prod.fecha_vencimiento | date:'dd/MM/yyyy' }}
-                            </small>
-                            <small class="fecha-vence sin-fecha" *ngIf="!prod.fecha_vencimiento">
-                                Sin fecha
-                            </small>
                             <span class="stock-badge" [style.background]="
                                 prod.stock_actual === 0 ? '#c0392b' :
                                 prod.stock_actual <= prod.stock_minimo ? 'orange' : '#27ae60'">
@@ -314,11 +307,8 @@
                                 <label>Stock actual
                                     <input type="number" [(ngModel)]="editForm.stock_actual" min="0">
                                 </label>
-                                <label>Vencimiento
-                                    <input type="date" [(ngModel)]="editForm.fecha_vencimiento">
-                                </label>
                                 <div class="edit-acciones">
-                                    <button class="btn-guardar" (click)="guardarEdicion(prod)">Guardar</button>
+                                    <button class="btn-guardar" [disabled]="guardando" (click)="guardarEdicion(prod)">{{ guardando ? 'Guardando...' : 'Guardar' }}</button>
                                     <button class="btn-cancelar-edit" (click)="cerrarEdicion()">Cancelar</button>
                                 </div>
                             </div>

@@ -164,10 +164,11 @@ export class Admin implements OnInit, OnDestroy {
     this.editandoId   = `${tipo}-${item.id}`;
     this.editandoTipo = tipo;
     this.editForm = {
-      stock_actual:       item.stock_actual,
-      stock_minimo:       item.stock_minimo,
-      precio:            item.precio,
-      fecha_vencimiento:  item.fecha_vencimiento
+      stock_actual: item.stock_actual,
+      stock_minimo: item.stock_minimo,
+      precio:       item.precio,
+      // Solo los ingredientes manejan fecha de vencimiento; los productos ya no.
+      fecha_vencimiento: tipo === 'ingrediente' && item.fecha_vencimiento
         ? new Date(item.fecha_vencimiento).toISOString().slice(0, 10)
         : ''
     };
@@ -206,9 +207,12 @@ export class Admin implements OnInit, OnDestroy {
       };
 
       await peticion(url, {
-        stock_actual:      Number(this.editForm.stock_actual),
-        stock_minimo:      Number(this.editForm.stock_minimo),
-        fecha_vencimiento: this.editForm.fecha_vencimiento || null
+        stock_actual: Number(this.editForm.stock_actual),
+        stock_minimo: Number(this.editForm.stock_minimo),
+        // Los productos ya no manejan vencimiento; solo los ingredientes.
+        fecha_vencimiento: tipo === 'ingrediente'
+          ? (this.editForm.fecha_vencimiento || null)
+          : null
       });
 
       if (tipo === 'producto' && this.editForm.precio != null && this.editForm.precio !== '') {
