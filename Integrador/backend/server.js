@@ -330,11 +330,11 @@ app.get('/stock', async (req, res) => {
   }
 });
 
-// Stock completo para admin (incluye fecha_vencimiento)
+// Stock completo para admin
 app.get('/stock-admin', async (req, res) => {
   try {
     const [productos] = await db.query(
-      `SELECT p.id, p.nombre, p.categoria,
+      `SELECT p.id, p.nombre, p.categoria, p.precio,
         i.stock_actual, i.stock_minimo, i.stock_maximo,
         i.fecha_vencimiento
         FROM productos p
@@ -428,6 +428,20 @@ app.get('/pedidos-activos-count', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.put('/productos/:id/precio', async (req, res) => {
+  const { id } = req.params;
+  const { precio } = req.body;
+  try {
+    await db.query(
+      'UPDATE productos SET precio = ? WHERE id = ?',
+      [precio, id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}); 
 
 async function iniciar() {
   await cargarPedidosActivos();

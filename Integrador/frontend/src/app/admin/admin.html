@@ -308,14 +308,11 @@
                             <small class="categoria-badge">{{ prod.categoria }}</small>
                             <h4>{{ prod.nombre }}</h4>
                             <div class="edit-form">
+                                <label>Precio (S/)
+                                    <input type="number" [(ngModel)]="editForm.precio" min="0" step="0.50">
+                                </label>
                                 <label>Stock actual
                                     <input type="number" [(ngModel)]="editForm.stock_actual" min="0">
-                                </label>
-                                <label>Stock mínimo
-                                    <input type="number" [(ngModel)]="editForm.stock_minimo" min="0">
-                                </label>
-                                <label>Stock máximo
-                                    <input type="number" [(ngModel)]="editForm.stock_maximo" min="0">
                                 </label>
                                 <label>Vencimiento
                                     <input type="date" [(ngModel)]="editForm.fecha_vencimiento">

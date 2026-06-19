@@ -166,7 +166,7 @@ export class Admin implements OnInit, OnDestroy {
     this.editForm = {
       stock_actual:       item.stock_actual,
       stock_minimo:       item.stock_minimo,
-      stock_maximo:       item.stock_maximo,
+      precio:            item.precio,
       fecha_vencimiento:  item.fecha_vencimiento
         ? new Date(item.fecha_vencimiento).toISOString().slice(0, 10)
         : ''
@@ -185,17 +185,29 @@ export class Admin implements OnInit, OnDestroy {
       ? `https://integrador-proy-1.onrender.com/stock-admin/producto/${item.id}`
       : `https://integrador-proy-1.onrender.com/stock-admin/ingrediente/${item.id}`;
 
-    fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        stock_actual:      Number(this.editForm.stock_actual),
-        stock_minimo:      Number(this.editForm.stock_minimo),
-        stock_maximo:      this.editForm.stock_maximo ? Number(this.editForm.stock_maximo) : undefined,
-        fecha_vencimiento: this.editForm.fecha_vencimiento || null
+    const peticiones = [
+      fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stock_actual:      Number(this.editForm.stock_actual),
+          stock_minimo:      Number(this.editForm.stock_minimo),
+          fecha_vencimiento: this.editForm.fecha_vencimiento || null
+        })
       })
-    })
-      .then(r => r.json())
+    ];
+
+    if (tipo === 'producto' && this.editForm.precio != null) {
+      peticiones.push(
+        fetch(`https://integrador-proy-1.onrender.com/productos/${item.id}/precio`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ precio: Number(this.editForm.precio) })
+        })
+      );
+    }
+
+    Promise.all(peticiones)
       .then(() => {
         this.cerrarEdicion();
         this.cargarStock();
