@@ -179,40 +179,53 @@ export class Admin implements OnInit, OnDestroy {
     this.editForm     = {};
   }
 
-  guardarEdicion(item: any) {
+  guardando: boolean = false;
+
+  async guardarEdicion(item: any) {
     const tipo = this.editandoTipo!;
     const url  = tipo === 'producto'
       ? `https://integrador-proy-1.onrender.com/stock-admin/producto/${item.id}`
       : `https://integrador-proy-1.onrender.com/stock-admin/ingrediente/${item.id}`;
 
-    const peticiones = [
-      fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          stock_actual:      Number(this.editForm.stock_actual),
-          stock_minimo:      Number(this.editForm.stock_minimo),
-          fecha_vencimiento: this.editForm.fecha_vencimiento || null
-        })
-      })
-    ];
+    this.guardando = true;
 
-    if (tipo === 'producto' && this.editForm.precio != null) {
-      peticiones.push(
-        fetch(`https://integrador-proy-1.onrender.com/productos/${item.id}/precio`, {
+    try {
+      // Helper: hace el fetch y lanza error si la respuesta no es 2xx,
+      // en vez de dejarlo pasar en silencio como antes.
+      const peticion = async (peticionUrl: string, body: any) => {
+        const res = await fetch(peticionUrl, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ precio: Number(this.editForm.precio) })
-        })
-      );
-    }
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const texto = await res.text().catch(() => '');
+          throw new Error(`(${res.status}) ${peticionUrl} → ${texto || res.statusText}`);
+        }
+        return res;
+      };
 
-    Promise.all(peticiones)
-      .then(() => {
-        this.cerrarEdicion();
-        this.cargarStock();
-      })
-      .catch(err => console.error('Error guardando:', err));
+      await peticion(url, {
+        stock_actual:      Number(this.editForm.stock_actual),
+        stock_minimo:      Number(this.editForm.stock_minimo),
+        fecha_vencimiento: this.editForm.fecha_vencimiento || null
+      });
+
+      if (tipo === 'producto' && this.editForm.precio != null && this.editForm.precio !== '') {
+        await peticion(`https://integrador-proy-1.onrender.com/productos/${item.id}/precio`, {
+          precio: Number(this.editForm.precio)
+        });
+      }
+
+      this.cerrarEdicion();
+      this.cargarStock();
+    } catch (err: any) {
+      console.error('Error guardando:', err);
+      alert('No se pudo guardar el cambio.\n\n' + (err?.message || err));
+    } finally {
+      this.guardando = false;
+      this.cdr.detectChanges();
+    }
   }
 
   get pedidosHoy(): any[] {
